@@ -1,0 +1,9 @@
+Flask
+Flask-RESTful
+Flask-JWT-Extended
+Flask-SQLAlchemy
+Flask-Marshmallow
+Flask-OAuthlib
+marshmallow
+marshmallow-sqlalchemy
+Werkzeug (v0.16.1)

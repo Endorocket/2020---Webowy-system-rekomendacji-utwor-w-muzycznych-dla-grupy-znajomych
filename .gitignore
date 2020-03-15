@@ -1,0 +1,7 @@
+
+*.iml
+.idea/**
+**/__pycache__/**
+venv/**
+code/properties.py
+data.db
