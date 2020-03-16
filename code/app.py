@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from marshmallow import ValidationError
 
+from config.bcrypt import bcrypt
 from config.db import db
 from config.ma import ma
 from properties import APP_SECRET_KEY
@@ -37,4 +38,5 @@ api.add_resource(SpotifyAuthorize, "/login/spotify/authorized", endpoint="spotif
 if __name__ == "__main__":
     db.init_app(app)
     ma.init_app(app)
+    bcrypt.init_app(app)
     app.run(port=5000, debug=True)

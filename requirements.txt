@@ -4,6 +4,7 @@ Flask-JWT-Extended
 Flask-SQLAlchemy
 Flask-Marshmallow
 Flask-OAuthlib
+Flask-Bcrypt
 marshmallow
 marshmallow-sqlalchemy
 Werkzeug (v0.16.1)
