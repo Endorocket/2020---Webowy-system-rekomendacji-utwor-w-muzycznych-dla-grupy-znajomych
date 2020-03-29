@@ -30,14 +30,15 @@ class SpotifyAuthorize(Resource):
         # TODO - save tokens in session?
 
         spotify_user = spotify.get('me', token=spotify_access_token)
+        spotify_username = spotify_user.data['display_name']
         spotify_email = spotify_user.data['email']
 
         user = UserModel.find_by_email(spotify_email)
 
         if not user:
-            user = UserModel(email=spotify_email, password=None)
+            user = UserModel(username=spotify_username, email=spotify_email, password=None)
             user.save_to_db()
 
-        access_token = create_access_token(identity=user.id, fresh=True)
+        access_token = create_access_token(identity=str(user.id), fresh=True)
 
         return {"access_token": access_token}

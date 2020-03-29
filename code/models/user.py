@@ -1,25 +1,44 @@
+import bson
 from config.db import db
 
 
-class UserModel(db.Model):
-    __tablename__ = "users"
+class UserModel(db.Document):
+    username = db.StringField(required=True, unique=True)
+    email = db.StringField(required=True, unique=True)
+    password = db.StringField()
+    avatar_url = db.StringField()
+    pref_genres = db.ListField(db.StringField())
 
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(80), nullable=False, unique=True)
-    password = db.Column(db.String(80))
+    meta = {
+        'collection': 'users',
+        'indexes': [
+            'username',
+            'email'
+        ]
+    }
+
+    def json(self):
+        return {
+            'username': self.username,
+            'email': self.email,
+            'avatar_url': self.avatar_url,
+            'pref_genres': list(self.pref_genres)
+        }
+
+    @classmethod
+    def find_by_id(cls, _id: bson.ObjectId) -> "UserModel":
+        return cls.objects(id=_id).first()
+
+    @classmethod
+    def find_by_username(cls, username: str) -> "UserModel":
+        return cls.objects(username=username).first()
 
     @classmethod
     def find_by_email(cls, email: str) -> "UserModel":
-        return cls.query.filter_by(email=email).first()
-
-    @classmethod
-    def find_by_id(cls, _id: int) -> "UserModel":
-        return cls.query.filter_by(id=_id).first()
+        return cls.objects(email=email).first()
 
     def save_to_db(self) -> None:
-        db.session.add(self)
-        db.session.commit()
+        self.save()
 
     def delete_from_db(self) -> None:
-        db.session.delete(self)
-        db.session.commit()
+        self.delete()
