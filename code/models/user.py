@@ -9,6 +9,8 @@ class UserModel(db.Document):
     avatar_url = db.StringField()
     pref_genres = db.ListField(db.StringField())
 
+    song_ids = db.ListField(db.StringField())
+
     meta = {
         'collection': 'users',
         'indexes': [
