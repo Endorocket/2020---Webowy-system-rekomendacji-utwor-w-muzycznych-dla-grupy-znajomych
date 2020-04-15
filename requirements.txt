@@ -1,10 +1,10 @@
 Flask
 Flask-RESTful
 Flask-JWT-Extended
-Flask-SQLAlchemy
-Flask-Marshmallow
 Flask-OAuthlib
 Flask-Bcrypt
-marshmallow
-marshmallow-sqlalchemy
+PyMongo
+MongoEngine
+flask-mongoengine
+bson
 Werkzeug (v0.16.1)
