@@ -1,14 +1,15 @@
+from os import environ
+
 from flask_oauthlib.client import OAuth
 
 from config.scope import scope
-from properties import CONSUMER_KEY, CONSUMER_SECRET
 
 oauth = OAuth()
 
 spotify = oauth.remote_app(
     'spotify',
-    consumer_key=CONSUMER_KEY,
-    consumer_secret=CONSUMER_SECRET,
+    consumer_key=environ.get('CONSUMER_KEY'),
+    consumer_secret=environ.get('CONSUMER_SECRET'),
     request_token_params={"scope": scope},
     base_url="https://api.spotify.com/v1/",
     request_token_url=None,

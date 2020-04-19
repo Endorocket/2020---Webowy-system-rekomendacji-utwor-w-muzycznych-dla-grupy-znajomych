@@ -1,22 +1,28 @@
+from os import environ
+
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
 from config.bcrypt import bcrypt
-from config.db import db, DevelopmentConfig
-from properties import APP_SECRET_KEY
+from config.db import db, DevelopmentConfig, LocalConfig
 from resources.event import Event, CreateEvent, EventList
 from resources.invitation import InvitationByUsername, JoinByLink
 from resources.spotify_login import SpotifyLogin, SpotifyAuthorize
 from resources.user import UserRegister, User, UserLogin
 
 app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
+is_cloud = environ.get('IS_HEROKU', None)
+
+if is_cloud:
+    app.config.from_object(DevelopmentConfig)
+else:
+    app.config.from_object(LocalConfig)
+
 app.config['PROPAGATE_EXCEPTIONS'] = True
-app.secret_key = APP_SECRET_KEY
+app.secret_key = environ.get('APP_SECRET_KEY')
 api = Api(app)
 jwt = JWTManager(app)
-
 
 api.add_resource(UserRegister, "/register")
 api.add_resource(User, "/user/<user_id>")
