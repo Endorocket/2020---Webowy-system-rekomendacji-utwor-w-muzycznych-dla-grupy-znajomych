@@ -3,4 +3,4 @@
 .idea/**
 **/__pycache__/**
 venv/**
-code/properties.py
+/code1/properties.py

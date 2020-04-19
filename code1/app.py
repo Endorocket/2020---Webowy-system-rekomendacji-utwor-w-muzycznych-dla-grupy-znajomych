@@ -35,7 +35,8 @@ api.add_resource(CreateEvent, "/event")
 api.add_resource(InvitationByUsername, "/invite-to-event/<event_id>")
 api.add_resource(JoinByLink, "/join-event")
 
+db.init_app(app)
+bcrypt.init_app(app)
+
 if __name__ == "__main__":
-    db.init_app(app)
-    bcrypt.init_app(app)
     app.run(port=5000, debug=True)
