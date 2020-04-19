@@ -1,7 +1,7 @@
 import datetime
 
 import bson
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
 from config.bcrypt import bcrypt
@@ -18,12 +18,14 @@ class User(Resource):
         return user.json(), 200
 
     @classmethod
-    def delete(cls, user_id: str):
-        user: UserModel = UserModel.find_by_id(bson.ObjectId(user_id))
-        if not user:
-            return {"message": "User not found."}, 404
+    @jwt_required
+    def delete(cls):
+        current_userid = get_jwt_identity()
+        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        if not current_user:
+            return {"message": "Current user not found"}, 403
 
-        user.delete_from_db()
+        current_user.delete_from_db()
         return {"message": "User deleted."}, 200
 
 
