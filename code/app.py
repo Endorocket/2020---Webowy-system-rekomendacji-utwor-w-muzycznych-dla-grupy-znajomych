@@ -5,6 +5,8 @@ from flask_restful import Api
 from config.bcrypt import bcrypt
 from config.db import db, DevelopmentConfig
 from properties import APP_SECRET_KEY
+from resources.event import Event, CreateEvent, EventList
+from resources.invitation import InvitationByUsername, JoinByLink
 from resources.spotify_login import SpotifyLogin, SpotifyAuthorize
 from resources.user import UserRegister, User, UserLogin
 
@@ -21,6 +23,11 @@ api.add_resource(User, "/user/<user_id>")
 api.add_resource(UserLogin, "/login")
 api.add_resource(SpotifyLogin, "/login/spotify")
 api.add_resource(SpotifyAuthorize, "/login/spotify/authorized", endpoint="spotify.authorize")
+api.add_resource(Event, "/event/<event_id>")
+api.add_resource(EventList, "/events")
+api.add_resource(CreateEvent, "/event")
+api.add_resource(InvitationByUsername, "/invite-to-event/<event_id>")
+api.add_resource(JoinByLink, "/join-event")
 
 if __name__ == "__main__":
     db.init_app(app)
