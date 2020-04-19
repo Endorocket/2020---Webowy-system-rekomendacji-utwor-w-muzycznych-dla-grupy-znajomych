@@ -6,6 +6,7 @@ import bson
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
+from enums.frequency import Frequency
 from enums.role import Role
 from models.event import EventModel
 from models.participant import ParticipantModel
@@ -43,7 +44,8 @@ class CreateEvent(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=True)
         parser.add_argument('date', type=datetime.fromisoformat, required=True)
-        parser.add_argument('frequency', type=str, required=True)
+        parser.add_argument('frequency', type=str, required=True,
+                            choices=(Frequency.ONCE, Frequency.WEEK, Frequency.MONTH))
         parser.add_argument('image_url', type=str, required=False)
         data = parser.parse_args()
 

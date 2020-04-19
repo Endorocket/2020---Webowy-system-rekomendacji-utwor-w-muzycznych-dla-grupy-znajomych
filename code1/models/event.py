@@ -3,6 +3,7 @@ import bson
 from typing import List
 
 from config.db import db
+from enums.frequency import Frequency
 from enums.role import Role
 from models.participant import ParticipantModel
 from models.playlist import PlaylistModel
@@ -12,7 +13,7 @@ class EventModel(db.Document):
     name = db.StringField(required=True)
     invitation_link = db.StringField()
     date = db.DateTimeField()
-    frequency = db.StringField()
+    frequency = db.StringField(choices=(Frequency.ONCE, Frequency.WEEK, Frequency.MONTH))
     duration_time = db.IntField()
     image_url = db.StringField()
 
