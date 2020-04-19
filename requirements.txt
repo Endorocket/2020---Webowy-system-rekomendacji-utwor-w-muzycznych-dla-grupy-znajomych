@@ -8,6 +8,5 @@ MongoEngine
 flask-mongoengine
 numpy
 pandas
-bson
 Werkzeug==v0.16.1
 uwsgi
