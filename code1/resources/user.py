@@ -1,3 +1,5 @@
+import datetime
+
 import bson
 from flask_jwt_extended import create_access_token
 from flask_restful import Resource, reqparse
@@ -63,7 +65,8 @@ class UserLogin(Resource):
         user: UserModel = UserModel.find_by_email(data['email'])
 
         if user and user.password and bcrypt.check_password_hash(user.password, data['password']):
-            access_token = create_access_token(identity=str(user.id), fresh=True)
+            expires = datetime.timedelta(days=7)
+            access_token = create_access_token(identity=str(user.id), fresh=True, expires_delta=expires)
             return {"access_token": access_token}, 200
 
         return {"message": "Invalid credentials!"}, 401

@@ -1,3 +1,5 @@
+import datetime
+
 from flask import url_for, request
 from flask_jwt_extended import create_access_token
 from flask_restful import Resource
@@ -39,6 +41,7 @@ class SpotifyAuthorize(Resource):
             user = UserModel(username=spotify_username, email=spotify_email, password=None)
             user.save_to_db()
 
-        access_token = create_access_token(identity=str(user.id), fresh=True)
+        expires = datetime.timedelta(days=7)
+        access_token = create_access_token(identity=str(user.id), fresh=True, expires_delta=expires)
 
         return {"access_token": access_token}
