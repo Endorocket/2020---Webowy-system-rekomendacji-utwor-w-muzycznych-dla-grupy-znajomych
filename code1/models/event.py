@@ -58,10 +58,16 @@ class EventModel(db.Document):
         return list(cls.objects(participants__user_id=user_id))
 
     @classmethod
-    def add_new_participant(cls, _id: bson.ObjectId, user_id: bson.ObjectId) -> bool:
-        new_participant = ParticipantModel(user_id=user_id, role=Role.MEMBER)
+    def find_all_by_admin_id(cls, admin_id: bson.ObjectId) -> List["EventModel"]:
+        return list(cls.objects(participants__user_id=admin_id, participants__role=Role.ADMIN))
 
-        result = cls.objects(id=_id).update_one(push__participants=new_participant)
+    def add_new_participant(self, user_id: bson.ObjectId) -> bool:
+        new_participant = ParticipantModel(user_id=user_id, role=Role.MEMBER)
+        result = self.update(push__participants=new_participant)
+        return result == 1
+
+    def remove_participant(self, user_id: bson.ObjectId) -> bool:
+        result = self.update(pull__participants__user_id=user_id)
         return result == 1
 
     def save_to_db(self) -> None:

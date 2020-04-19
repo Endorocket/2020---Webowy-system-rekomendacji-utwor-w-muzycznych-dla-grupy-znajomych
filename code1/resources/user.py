@@ -1,10 +1,13 @@
 import datetime
+from typing import List
 
 import bson
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
 from config.bcrypt import bcrypt
+from enums.role import Role
+from models.event import EventModel
 from models.user import UserModel
 
 
@@ -19,13 +22,22 @@ class User(Resource):
 
     @classmethod
     @jwt_required
-    def delete(cls):
+    def delete(cls, user_id: str):
         current_userid = get_jwt_identity()
+        if current_userid != user_id:
+            return {"message": "Wrong user_id"}, 403
+
         current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 
         current_user.delete_from_db()
+
+        events: List[EventModel] = EventModel.find_all_by_admin_id(admin_id=current_user.id)
+        for event in events:
+            if len(list(filter(lambda participant: participant.role == Role.ADMIN, event.participants))) == 1:
+                event.delete()
+
         return {"message": "User deleted."}, 200
 
 
