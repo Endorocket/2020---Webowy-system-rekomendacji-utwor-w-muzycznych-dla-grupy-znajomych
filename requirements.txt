@@ -6,5 +6,7 @@ Flask-Bcrypt
 PyMongo
 MongoEngine
 flask-mongoengine
+numpy
+pandas
 bson
-Werkzeug (v0.16.1)
+Werkzeug==v0.16.1
