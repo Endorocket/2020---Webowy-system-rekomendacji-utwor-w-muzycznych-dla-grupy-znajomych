@@ -3,6 +3,7 @@ Flask-RESTful
 Flask-JWT-Extended
 Flask-OAuthlib
 Flask-Bcrypt
+Flask-Cors
 PyMongo
 MongoEngine
 flask-mongoengine
