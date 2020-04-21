@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import List
 
-import bson
+from bson import ObjectId
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
@@ -16,7 +16,10 @@ from models.user import UserModel
 class Event(Resource):
     @classmethod
     def get(cls, event_id: str):
-        event: EventModel = EventModel.find_by_id(bson.ObjectId(event_id))
+        if not ObjectId.is_valid(event_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
+        event: EventModel = EventModel.find_by_id(ObjectId(event_id))
         if not event:
             return {"message": "Event not found."}, 404
 
@@ -28,7 +31,7 @@ class EventList(Resource):
     @jwt_required
     def get(cls):
         current_userid = get_jwt_identity()
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 

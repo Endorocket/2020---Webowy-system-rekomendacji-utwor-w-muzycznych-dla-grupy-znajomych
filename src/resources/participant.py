@@ -1,4 +1,4 @@
-import bson
+from bson import ObjectId
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
@@ -16,8 +16,11 @@ class InvitationByUsername(Resource):
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
 
+        if not ObjectId.is_valid(event_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
         current_userid = get_jwt_identity()
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 
@@ -25,7 +28,7 @@ class InvitationByUsername(Resource):
         if not user_to_add:
             return {"message": "User you want to add not found"}, 403
 
-        event = EventModel.find_by_id_and_admin_id(bson.ObjectId(event_id), current_user.id)
+        event = EventModel.find_by_id_and_admin_id(ObjectId(event_id), current_user.id)
         if not event:
             return {"message": "Event with admin as current user not found"}, 403
 
@@ -48,7 +51,7 @@ class JoinByLink(Resource):
         data = parser.parse_args()
 
         current_userid = get_jwt_identity()
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "User not found"}, 403
 
@@ -73,8 +76,11 @@ class RemoveUser(Resource):
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
 
+        if not ObjectId.is_valid(event_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
         current_userid = get_jwt_identity()
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 
@@ -82,7 +88,7 @@ class RemoveUser(Resource):
         if not user_to_add:
             return {"message": "User you want to add not found"}, 403
 
-        event = EventModel.find_by_id_and_admin_id(bson.ObjectId(event_id), current_user.id)
+        event = EventModel.find_by_id_and_admin_id(ObjectId(event_id), current_user.id)
         if not event:
             return {"message": "Event with admin as current user not found"}, 403
 
@@ -106,8 +112,11 @@ class GrantAdmin(Resource):
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
 
+        if not ObjectId.is_valid(event_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
         current_userid = get_jwt_identity()
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 
@@ -115,7 +124,7 @@ class GrantAdmin(Resource):
         if not user_to_update:
             return {"message": "User you want to add not found"}, 403
 
-        event = EventModel.find_by_id_and_admin_id(bson.ObjectId(event_id), current_user.id)
+        event = EventModel.find_by_id_and_admin_id(ObjectId(event_id), current_user.id)
         if not event:
             return {"message": "Event with admin as current user not found"}, 403
 
@@ -138,8 +147,11 @@ class RevokeAdmin(Resource):
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
 
+        if not ObjectId.is_valid(event_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
         current_userid = get_jwt_identity()
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 
@@ -149,7 +161,7 @@ class RevokeAdmin(Resource):
         if user_to_update.id == current_user.id:
             return {"message": "Cannot revoke admin to yourself"}, 403
 
-        event = EventModel.find_by_id_and_admin_id(bson.ObjectId(event_id), current_user.id)
+        event = EventModel.find_by_id_and_admin_id(ObjectId(event_id), current_user.id)
         if not event:
             return {"message": "Event with admin as current user not found"}, 403
 

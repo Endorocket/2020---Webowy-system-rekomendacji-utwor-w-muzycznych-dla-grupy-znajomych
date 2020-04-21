@@ -1,7 +1,7 @@
 import datetime
 from typing import List
 
-import bson
+from bson import ObjectId
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
@@ -14,7 +14,10 @@ from models.user import UserModel
 class User(Resource):
     @classmethod
     def get(cls, user_id: str):
-        user: UserModel = UserModel.find_by_id(bson.ObjectId(user_id))
+        if not ObjectId.is_valid(user_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
+        user: UserModel = UserModel.find_by_id(ObjectId(user_id))
         if not user:
             return {"message": "User not found."}, 404
 
@@ -23,11 +26,14 @@ class User(Resource):
     @classmethod
     @jwt_required
     def delete(cls, user_id: str):
+        if not ObjectId.is_valid(user_id):
+            return {"message": "Id is not valid ObjectId"}, 400
+
         current_userid = get_jwt_identity()
         if current_userid != user_id:
             return {"message": "Wrong user_id"}, 403
 
-        current_user = UserModel.find_by_id(bson.ObjectId(current_userid))
+        current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
             return {"message": "Current user not found"}, 403
 

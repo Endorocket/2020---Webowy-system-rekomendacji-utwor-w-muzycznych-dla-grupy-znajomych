@@ -3,6 +3,7 @@ from os import environ
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
+from flask_cors import CORS
 
 from config.bcrypt import bcrypt
 from config.db import db, DevelopmentConfig, LocalConfig
@@ -10,7 +11,6 @@ from resources.event import Event, CreateEvent, EventList
 from resources.participant import InvitationByUsername, JoinByLink, RemoveUser, GrantAdmin, RevokeAdmin
 from resources.spotify_login import SpotifyLogin, SpotifyAuthorize
 from resources.user import UserRegister, User, UserLogin
-from flask_cors import CORS
 
 app = Flask(__name__)
 is_cloud = environ.get('IS_HEROKU', None)
