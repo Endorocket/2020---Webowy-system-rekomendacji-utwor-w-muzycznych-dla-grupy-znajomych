@@ -23,23 +23,29 @@ class User(Resource):
 
         return user.json(), 200
 
+
+class UserCurrent(Resource):
     @classmethod
     @jwt_required
-    def delete(cls, user_id: str):
-        if not ObjectId.is_valid(user_id):
-            return {"message": "Id is not valid ObjectId"}, 400
+    def get(cls):
+        user_id = get_jwt_identity()
+        user: UserModel = UserModel.find_by_id(ObjectId(user_id))
+        if not user:
+            return {"message": "User not found."}, 404
 
-        current_userid = get_jwt_identity()
-        if current_userid != user_id:
-            return {"message": "Wrong user_id"}, 403
+        return user.json(), 200
 
-        current_user = UserModel.find_by_id(ObjectId(current_userid))
-        if not current_user:
-            return {"message": "Current user not found"}, 403
+    @classmethod
+    @jwt_required
+    def delete(cls):
+        user_id = get_jwt_identity()
+        user = UserModel.find_by_id(ObjectId(user_id))
+        if not user:
+            return {"message": "Current user not found"}, 404
 
-        current_user.delete_from_db()
+        user.delete_from_db()
 
-        events: List[EventModel] = EventModel.find_all_by_admin_id(admin_id=current_user.id)
+        events: List[EventModel] = EventModel.find_all_by_admin_id(admin_id=user.id)
         for event in events:
             if len(list(filter(lambda participant: participant.role == Role.ADMIN, event.participants))) == 1:
                 event.delete()
