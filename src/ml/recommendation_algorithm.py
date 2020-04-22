@@ -3,10 +3,11 @@ import sys
 import spotipy.util as util
 import numpy as np
 import pandas as pd
+import json
 from surprise import SVD
 from surprise import Dataset
 from surprise import Reader
-from collections import defaultdict
+from collections import defaultdict,Counter
 import pprint
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy import oauth2
@@ -73,6 +74,18 @@ class Recommendation_Algorithm_SVD:
 
         top_n_predictions = self.get_top_n_for_user(predictions,10)
 
+        sum_of_predictions = defaultdict(float)
+        for dict in top_n_predictions:
+            for key in dict:
+                if key in sum_of_predictions:
+                    sum_of_predictions[key] += dict[key]
+                else:
+                    sum_of_predictions[key] = dict[key]
+
+        sorted(sum_of_predictions.items(),key=lambda k_v: k_v[1], reverse=True)
+
+        return
+
 
         def get_top_n_for_user(self, predictions, n=10):
 
@@ -85,3 +98,4 @@ class Recommendation_Algorithm_SVD:
                 top_n[uid] = user_ratings[:n]
 
             return top_n
+
