@@ -21,6 +21,7 @@ class UserModel(db.Document):
 
     def json(self):
         return {
+            'id': str(self.id),
             'username': self.username,
             'email': self.email,
             'avatar_url': self.avatar_url,

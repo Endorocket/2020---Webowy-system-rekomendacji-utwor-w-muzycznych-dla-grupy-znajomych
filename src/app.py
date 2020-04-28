@@ -10,7 +10,7 @@ from config.db import db, DevelopmentConfig, LocalConfig
 from resources.event import Event, CreateEvent, EventList
 from resources.participant import InvitationByUsername, JoinByLink, RemoveUser, GrantAdmin, RevokeAdmin
 from resources.spotify_login import SpotifyLogin, SpotifyAuthorize
-from resources.user import UserRegister, User, UserLogin
+from resources.user import UserRegister, User, UserLogin, UserCurrent
 
 app = Flask(__name__)
 is_cloud = environ.get('IS_HEROKU', None)
@@ -27,8 +27,9 @@ jwt = JWTManager(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 api.add_resource(UserRegister, "/api/register")
-api.add_resource(User, "/api/user/<user_id>")
 api.add_resource(UserLogin, "/api/login")
+api.add_resource(User, "/api/user/<user_id>")
+api.add_resource(UserCurrent, "/api/user/current")
 api.add_resource(SpotifyLogin, "/api/login/spotify")
 api.add_resource(SpotifyAuthorize, "/api/login/spotify/authorized", endpoint="spotify.authorize")
 api.add_resource(Event, "/api/event/<event_id>")
