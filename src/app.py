@@ -21,7 +21,6 @@ else:
     app.config.from_object(LocalConfig)
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
-app.config['ERROR_404_HELP'] = False
 app.secret_key = environ.get('APP_SECRET_KEY')
 api = Api(app)
 jwt = JWTManager(app)
