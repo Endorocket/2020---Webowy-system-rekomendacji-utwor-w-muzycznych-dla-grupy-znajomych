@@ -27,9 +27,6 @@ class SpotifyAuthorize(Resource):
             return error_response
 
         spotify_access_token = response['access_token']
-        spotify_refresh_token = response['refresh_token']
-
-        # TODO - save tokens in session?
 
         spotify_user = spotify.get('me', token=spotify_access_token)
         spotify_username = spotify_user.data['display_name']
@@ -41,7 +38,7 @@ class SpotifyAuthorize(Resource):
             user = UserModel(username=spotify_username, email=spotify_email, password=None)
             user.save_to_db()
 
-        expires = datetime.timedelta(days=7)
+        expires = datetime.timedelta(hours=1)
         access_token = create_access_token(identity=str(user.id), fresh=True, expires_delta=expires)
 
         return {"access_token": access_token}
