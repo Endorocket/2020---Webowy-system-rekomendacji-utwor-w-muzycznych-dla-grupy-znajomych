@@ -22,7 +22,10 @@ class Event(Resource):
         if not event:
             return {"message": "Event not found."}, 404
 
-        return event.json(), 200
+        participants_id = list(map(lambda participant: participant.user_id, event.participants))
+        users: List[UserModel] = UserModel.find_all_by_ids(participants_id)
+
+        return event.json(users), 200
 
 
 class EventList(Resource):

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 import bson
 
@@ -6,6 +6,7 @@ from config.db import db
 from enums.role import Role
 from models.participant import ParticipantModel
 from models.playlist import PlaylistModel
+from models.user import UserModel
 
 
 class EventModel(db.Document):
@@ -28,7 +29,7 @@ class EventModel(db.Document):
         ]
     }
 
-    def json(self):
+    def json(self, users: List[UserModel] = None) -> Dict:
         return {
             'id': str(self.id),
             'name': self.name,
@@ -39,7 +40,8 @@ class EventModel(db.Document):
             'duration_time': self.duration_time,
             'image_url': self.image_url,
             'playlist': list(map(lambda playlist: playlist.json(), self.playlist)) if self.playlist else [],
-            'participants': list(map(lambda participant: participant.json(), self.participants))
+            'participants': list(map(lambda participant: participant.json(), self.participants)) if users is None
+            else list(map(lambda participant, user: participant.json(user), self.participants, users))
         }
 
     @classmethod

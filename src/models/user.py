@@ -1,4 +1,6 @@
-import bson
+from typing import List
+
+from bson import ObjectId
 from config.db import db
 
 
@@ -29,7 +31,7 @@ class UserModel(db.Document):
         }
 
     @classmethod
-    def find_by_id(cls, _id: bson.ObjectId) -> "UserModel":
+    def find_by_id(cls, _id: ObjectId) -> "UserModel":
         return cls.objects(id=_id).first()
 
     @classmethod
@@ -45,3 +47,7 @@ class UserModel(db.Document):
 
     def delete_from_db(self) -> None:
         self.delete()
+
+    @classmethod
+    def find_all_by_ids(cls, ids: List[ObjectId]) -> List["UserModel"]:
+        return list(cls.objects(id__in=ids))
