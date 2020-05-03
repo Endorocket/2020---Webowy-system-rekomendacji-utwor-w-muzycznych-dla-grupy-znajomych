@@ -1,9 +1,8 @@
-import bson
-
 from typing import List
 
+import bson
+
 from config.db import db
-from enums.frequency import Frequency
 from enums.role import Role
 from models.participant import ParticipantModel
 from models.playlist import PlaylistModel
@@ -11,9 +10,10 @@ from models.playlist import PlaylistModel
 
 class EventModel(db.Document):
     name = db.StringField(required=True)
+    description = db.StringField()
     invitation_link = db.StringField()
-    date = db.DateTimeField()
-    frequency = db.StringField(choices=(Frequency.ONCE, Frequency.WEEK, Frequency.MONTH))
+    start_date = db.DateTimeField()
+    end_date = db.DateTimeField()
     duration_time = db.IntField()
     image_url = db.StringField()
 
@@ -32,9 +32,10 @@ class EventModel(db.Document):
         return {
             'id': str(self.id),
             'name': self.name,
+            'description': self.description,
             'invitation_link': self.invitation_link,
-            'date': str(self.date),
-            'frequency': self.frequency,
+            'start_date': str(self.start_date),
+            'end_date': str(self.end_date),
             'duration_time': self.duration_time,
             'image_url': self.image_url,
             'playlist': list(map(lambda playlist: playlist.json(), self.playlist)) if self.playlist else [],
