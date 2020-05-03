@@ -6,7 +6,6 @@ from bson import ObjectId
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
-from enums.frequency import Frequency
 from enums.role import Role
 from models.event import EventModel
 from models.participant import ParticipantModel
@@ -23,7 +22,10 @@ class Event(Resource):
         if not event:
             return {"message": "Event not found."}, 404
 
-        return event.json(), 200
+        participants_id = list(map(lambda participant: participant.user_id, event.participants))
+        users: List[UserModel] = UserModel.find_all_by_ids(participants_id)
+
+        return event.json(users), 200
 
 
 class EventList(Resource):
@@ -46,9 +48,10 @@ class CreateEvent(Resource):
     def post(cls):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=True)
-        parser.add_argument('date', type=datetime.fromisoformat, required=True)
-        parser.add_argument('frequency', type=str, required=True,
-                            choices=(Frequency.ONCE, Frequency.WEEK, Frequency.MONTH))
+        parser.add_argument('description', type=str, required=False)
+        parser.add_argument('start_date', type=datetime.fromisoformat, required=True)
+        parser.add_argument('end_date', type=datetime.fromisoformat, required=True)
+        parser.add_argument('duration_time', type=int, required=False)
         parser.add_argument('image_url', type=str, required=False)
         data = parser.parse_args()
 
@@ -58,8 +61,17 @@ class CreateEvent(Resource):
         if not current_user:
             return {"message": "User not found"}, 403
 
-        event = EventModel(name=data['name'], date=data['date'], frequency=data['frequency'],
-                           image_url=data['image_url'])
+        start_date: datetime = data['start_date']
+        end_date: datetime = data['end_date']
+        if start_date > end_date:
+            return {"message": "End_date cannot be before start_date"}, 403
+
+        duration_time = data['duration_time']
+        if duration_time < 0:
+            return {"message": "Duration_time cannot be less than 0"}, 403
+
+        event = EventModel(name=data['name'], description=data['description'], start_date=start_date, end_date=end_date, image_url=data['image_url'],
+                           duration_time=duration_time)
 
         admin_participant = ParticipantModel(user_id=current_user.id, role=Role.ADMIN)
         event.participants.append(admin_participant)
