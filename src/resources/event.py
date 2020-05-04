@@ -67,7 +67,7 @@ class CreateEvent(Resource):
             return {"message": "End_date cannot be before start_date"}, 403
 
         duration_time = data['duration_time']
-        if duration_time < 0:
+        if duration_time and duration_time < 0:
             return {"message": "Duration_time cannot be less than 0"}, 403
 
         event = EventModel(name=data['name'], description=data['description'], start_date=start_date, end_date=end_date, image_url=data['image_url'],
