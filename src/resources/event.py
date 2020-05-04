@@ -39,7 +39,8 @@ class EventList(Resource):
 
         events: List[EventModel] = EventModel.find_all_by_participant_id(current_user.id)
 
-        return {'events': list(map(lambda event: event.json(), events))}
+        return {'events': list(
+            map(lambda event: event.json(UserModel.find_all_by_ids(list(map(lambda participant: participant.user_id, event.participants)))), events))}
 
 
 class CreateEvent(Resource):
@@ -67,7 +68,7 @@ class CreateEvent(Resource):
             return {"message": "End_date cannot be before start_date"}, 403
 
         duration_time = data['duration_time']
-        if duration_time < 0:
+        if duration_time and duration_time < 0:
             return {"message": "Duration_time cannot be less than 0"}, 403
 
         event = EventModel(name=data['name'], description=data['description'], start_date=start_date, end_date=end_date, image_url=data['image_url'],

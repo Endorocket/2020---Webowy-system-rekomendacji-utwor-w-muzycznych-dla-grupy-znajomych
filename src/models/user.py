@@ -8,6 +8,7 @@ class UserModel(db.Document):
     username = db.StringField(required=True, unique=True)
     email = db.StringField(required=True, unique=True)
     password = db.StringField()
+    spotify_id = db.StringField()
     avatar_url = db.StringField()
     pref_genres = db.ListField(db.StringField())
 
