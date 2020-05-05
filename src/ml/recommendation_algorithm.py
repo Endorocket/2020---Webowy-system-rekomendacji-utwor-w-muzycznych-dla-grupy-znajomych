@@ -1,70 +1,59 @@
-import spotipy
-import sys
-import spotipy.util as util
 import numpy as np
 import pandas as pd
-import json
-from surprise import SVD
-from surprise import Dataset
-from surprise import Reader
+from surprise import SVD,Dataset,Reader
 from collections import defaultdict,Counter
-import pprint
-from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy import oauth2
-
-'''username = 'f'
-scope = 'user-library-read user-top-read'
-client_id ='b4e8d875ebc74954a74b53ca13f1761b'
-client_secret ='6e7b7779c1bc461a936d3e7bea55eea5'
-redirect_uri ='http://localhost:8080'
-token = util.prompt_for_user_token(username,
-                           scope,
-                           client_id,
-                           client_secret,
-                           redirect_uri)'''
-
-sp = spotipy.Spotify(auth=token)
+from bson import ObjectId
+from models.song import SongModel
+from models.user import UserModel
+from models.event import EventModel
+from models.paticipant import ParticipantModel
 
 
 class Recommendation_Algorithm_SVD:
-    def __init__(self,token,event_id,db):
-        self.event = event_id
-        self.token = token
-        self.db = db
-        self.users = []
-        self.genre_list = db.songs.find().distinct('genres')
-        self.scores_matrix = np.zeros((len(event_id.participants),len(self.genre_list)))
+    def __init__(self,event_id):
 
+        event = EventModel.find_by_id(event_id)
+        genre_list = SongModel.find_all_genres()
 
-        for participant in self.event_id.participants:
-            self.users.append(UserModel.find_by_id(participant.user_id))
-        for user in self.users:
-                for song in user.song_ids:
-                    artists_id = sp.track(song)['artist_id']
-                    for artist_id in artists_id['items']:
-                        genres = sp.artist(artist_id)['genres']
-                        for genre in genres:
-                            self.genre_list[self.genre_list.index(genre)] += 1
+        spotify_users = []
+        non_spotify_users = []
+        scores_matrix = np.zeros(len(event.participants),len(genre_list))
+
+        for participant in event.participants:
+            user = UserModel.find_by_id(ObjectId(participant.user_id))
+            if user.song_ids:
+                spotify_users.append(user)
+            else:
+                non_spotify_users.append(user)
+
+        for spotify_user in spotify_users:
+            for song_id in spotify_user.song_ids:
+                song_genres = SongModel.find_by_id(ObjectId(spotify_user.song_ids)).genres
+                for song_genre in song_genres:
+                    scores_matrix[spotify_users.index(spotify_user)][genre_list.index(song_genre)] += 1
+
+        max_score = np.amax(scores_matrix) if np.amax(scores_matrix)> 0 else 1
+
+        for non_spotify_user in non_spotify_users:
+            for pref_genre in non_spotify_user.pref_genre:
+                scores_matrix[spotify_users.index(len(spotify_users) + non_spotify_user)][genre_list.index(pref_genre)] = max_score
 
         ratings_dict = {'itemID': [],
                         'userID': [],
                         'rating': []}
 
-        for i in range(self.scores_matrix.shape[0]):
-            for j in range(self.scores_matrix.shape[1]):
-                if self.scores_matrix[i][j] != 0:
-                    ratings_dict['itemID'].append(self.genre_list[i])
-                    ratings_dict['userID'].append(self.event['users'][j])
-                    ratings_dict['rating'].append(self.scores_matrix[i][j])
+        for i in range(scores_matrix.shape[0]):
+            for j in range(scores_matrix.shape[1]):
+                if scores_matrix[i][j] != 0:
+                    ratings_dict['itemID'].append(genre_list[j])
+                    ratings_dict['userID'].append(event.participants[i].user_id)
+                    ratings_dict['rating'].append(scores_matrix[i][j])
+
 
         df = pd.DataFrame(ratings_dict)
-
-        reader = Reader()
-
+        reader = Reader(rating_scale=(0, max_score))
         data = Dataset.load_from_df(df[['userID', 'itemID', 'rating']], reader)
-
         trainset = data.build_full_trainset()
-
 
         algorithm = SVD()
         algorithm.fit(trainset)
@@ -72,30 +61,37 @@ class Recommendation_Algorithm_SVD:
         testset = trainset.build_anti_testset()
         predictions = algorithm.test(testset)
 
-        top_n_predictions = self.get_top_n_for_user(predictions,10)
+        results = np.zeros(scores_matrix.shape)
+        for uid, iid, _, est, _ in predictions:
+            results[event.participants.index(uid)][genre_list.index(iid)] = est
+        results = scores_matrix + results
+        cumulative_scores = np.apply_along_axis(sum, 0, results)
+        probabilities = cumulative_scores / np.sum(cumulative_scores)
 
-        sum_of_predictions = defaultdict(float)
-        for dict in top_n_predictions:
-            for key in dict:
-                if key in sum_of_predictions:
-                    sum_of_predictions[key] += dict[key]
-                else:
-                    sum_of_predictions[key] = dict[key]
+        playlist_duration = 0
+        playlist = []
 
-        sorted(sum_of_predictions.items(),key=lambda k_v: k_v[1], reverse=True)
+        if event.duration_time > 0 :
+            while event.duration > playlist_duration:
+                chosen_genre = np.random.choice(genre_list, 1, p=probabilities)
+                song = SongModel.random_from_genre(chosen_genre)
+                if song.track_id not in playlist:
+                    playlist.append(song.track_id)
+                    playlist_duration += song.duration
 
-        return
+        else:
+            while len(playlist) < 50:
+                chosen_genre = np.random.choice(genre_list, 1, p=probabilities)
+                song = SongModel.random_from_genre(chosen_genre)
+                if song.track_id not in playlist:
+                    playlist.append(song.track_id)
+                    playlist_duration += song.duration
+
+        return (playlist,playlist_duration)
 
 
-        def get_top_n_for_user(self, predictions, n=10):
 
-            top_n = defaultdict(list)
-            for uid, iid, est in predictions:
-                top_n[uid].append((iid, est))
 
-            for uid, user_ratings in top_n.items():
-                user_ratings.sort(key=lambda x: x[1], reverse=True)
-                top_n[uid] = user_ratings[:n]
 
-            return top_n
+
 
