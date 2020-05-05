@@ -11,6 +11,8 @@ from enums.role import Role
 from models.event import EventModel
 from models.participant import ParticipantModel
 from models.user import UserModel
+from models.playlist import PlaylistModel
+from ml.recommendation_algorithm import Recommendation_Algorithm_SVD
 
 
 class Event(Resource):
@@ -69,3 +71,15 @@ class CreateEvent(Resource):
         event.save_to_db()
 
         return {"message": "Event created successfully."}, 201
+
+class CreatePlaylist(Resource):
+    @classmethod
+    @jwt_required
+    def get(cls,event_id: str):
+        event: EventModel = EventModel.find_by_id(ObjectId(event_id))
+        song_ids,duration_time = Recommendation_Algorithm_SVD(event_id)
+        playlist: PlaylistModel(song_ids=song_ids,duration_time=duration_time)
+        event.playlist = EventModel(playlist=playlist)
+        event.save_to_db()
+
+        return playlist.json(), 200
