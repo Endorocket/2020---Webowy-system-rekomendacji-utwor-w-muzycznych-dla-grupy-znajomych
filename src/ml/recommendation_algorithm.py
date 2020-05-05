@@ -12,7 +12,7 @@ from models.paticipant import ParticipantModel
 class Recommendation_Algorithm_SVD:
     def __init__(self,event_id):
 
-        event = EventModel.find_by_id(event_id)
+        event = EventModel.find_by_id(ObjectId(event_id))
         genre_list = SongModel.find_all_genres()
 
         spotify_users = []
@@ -28,7 +28,7 @@ class Recommendation_Algorithm_SVD:
 
         for spotify_user in spotify_users:
             for song_id in spotify_user.song_ids:
-                song_genres = SongModel.find_by_id(ObjectId(spotify_user.song_ids)).genres
+                song_genres = SongModel.find_by_id(ObjectId(song_id)).genres
                 for song_genre in song_genres:
                     scores_matrix[spotify_users.index(spotify_user)][genre_list.index(song_genre)] += 1
 
