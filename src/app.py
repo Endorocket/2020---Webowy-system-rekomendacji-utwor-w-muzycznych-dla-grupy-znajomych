@@ -41,6 +41,7 @@ api.add_resource(GrantAdmin, "/api/event/<event_id>/grant-admin")
 api.add_resource(RevokeAdmin, "/api/event/<event_id>/revoke-admin")
 api.add_resource(JoinByLink, "/api/join-event")
 api.add_resource(ExportPlaylist, "/api/event/<event_id>/export-playlist")
+api.add_resource(CreatePlaylist, "/api/event/<event_id>/create-playlist")
 
 db.init_app(app)
 bcrypt.init_app(app)
