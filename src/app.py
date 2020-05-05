@@ -9,7 +9,7 @@ from config.bcrypt import bcrypt
 from config.db import db, DevelopmentConfig, LocalConfig
 from resources.event import Event, CreateEvent, EventList, CreatePlaylist
 from resources.participant import InvitationByUsername, JoinByLink, RemoveUser, GrantAdmin, RevokeAdmin
-from resources.spotify_login import SpotifyLogin, SpotifyAuthorize
+from resources.spotify import SpotifyLogin, SpotifyAuthorize, ExportPlaylist
 from resources.user import UserRegister, User, UserLogin, UserCurrent
 
 app = Flask(__name__)
@@ -40,7 +40,7 @@ api.add_resource(RemoveUser, "/api/event/<event_id>/remove-user")
 api.add_resource(GrantAdmin, "/api/event/<event_id>/grant-admin")
 api.add_resource(RevokeAdmin, "/api/event/<event_id>/revoke-admin")
 api.add_resource(JoinByLink, "/api/join-event")
-api.add_resource(CreatePlaylist, "/api/event/<event_id>/create-playlist")
+api.add_resource(ExportPlaylist, "/api/event/<event_id>/export-playlist")
 
 db.init_app(app)
 bcrypt.init_app(app)

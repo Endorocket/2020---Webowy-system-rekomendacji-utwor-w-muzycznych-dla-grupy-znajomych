@@ -9,6 +9,7 @@ from config.bcrypt import bcrypt
 from enums.role import Role
 from models.event import EventModel
 from models.user import UserModel
+from utils.email_validator import email
 
 
 class User(Resource):
@@ -57,9 +58,9 @@ class UserRegister(Resource):
     @classmethod
     def post(cls):
         parser = reqparse.RequestParser()
-        parser.add_argument('username', type=str, required=True, help="This field cannot be left blank!")
-        parser.add_argument('email', type=str, required=True, help="This field cannot be left blank!")
-        parser.add_argument('password', type=str, required=True, help="This field cannot be left blank!")
+        parser.add_argument('username', type=str, required=True)
+        parser.add_argument('email', type=email, required=True)
+        parser.add_argument('password', type=str, required=True)
         parser.add_argument('avatar_url', type=str, required=False)
         data = parser.parse_args()
 
@@ -84,8 +85,8 @@ class UserLogin(Resource):
     @classmethod
     def post(cls):
         parser = reqparse.RequestParser()
-        parser.add_argument('email', type=str, required=True, help="This field cannot be left blank!")
-        parser.add_argument('password', type=str, required=True, help="This field cannot be left blank!")
+        parser.add_argument('email', type=str, required=True)
+        parser.add_argument('password', type=str, required=True)
         data = parser.parse_args()
 
         user: UserModel = UserModel.find_by_email(data['email'])
