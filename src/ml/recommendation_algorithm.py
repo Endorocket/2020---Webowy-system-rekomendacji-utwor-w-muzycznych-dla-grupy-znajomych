@@ -6,7 +6,6 @@ from bson import ObjectId
 from models.song import SongModel
 from models.user import UserModel
 from models.event import EventModel
-from models.paticipant import ParticipantModel
 
 
 class Recommendation_Algorithm_SVD:
@@ -87,7 +86,7 @@ class Recommendation_Algorithm_SVD:
                     playlist.append(song.track_id)
                     playlist_duration += song.duration
 
-        return (playlist,playlist_duration)
+        return playlist
 
 
 
