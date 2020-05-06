@@ -91,10 +91,22 @@ class CreateEvent(Resource):
 class CreatePlaylist(Resource):
     @classmethod
     @jwt_required
-    def get(cls, event_id: str):
-        event: EventModel = EventModel.find_by_id(ObjectId(event_id))
-        song_ids = Recommendation_Algorithm_SVD(event_id)
-        event.playlist = song_ids
-        event.save_to_db()
+    def get(cls, event_id: str, ):
 
-        return event.json(), 200
+        event: EventModel = EventModel.find_by_id(ObjectId(event_id))
+
+        current_user_id = get_jwt_identity()
+
+        for participant in event.participants:
+            if current_user_id == participant.user_id:
+                if participant.role == Role.ADMIN:
+                    song_ids = Recommendation_Algorithm_SVD(event_id)
+                    event.playlist = song_ids
+                    event.save_to_db()
+
+                    return event.json(), 200
+                else:
+                    return {"message": "User is not an admin"}, 403
+
+        return {"message": "User is not event participant"}, 403
+
