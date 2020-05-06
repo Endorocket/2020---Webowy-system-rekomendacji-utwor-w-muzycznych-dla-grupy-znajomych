@@ -29,7 +29,7 @@ class EventModel(db.Document):
     }
 
     def json(self, users: List[UserModel] = None) -> Dict:
-        users_dict = {user.id: user for user in users}
+        users_dict = {user.id: user for user in users} if users else None
         return {
             'id': str(self.id),
             'name': self.name,

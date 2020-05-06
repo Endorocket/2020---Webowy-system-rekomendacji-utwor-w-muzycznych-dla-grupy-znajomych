@@ -1,7 +1,7 @@
 import datetime
 
 from bson import ObjectId
-from flask import url_for, request
+from flask import url_for, request, redirect
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
 
@@ -46,7 +46,7 @@ class SpotifyAuthorize(Resource):
         expires = datetime.timedelta(hours=1)
         access_token = create_access_token(identity=str(user.id), fresh=True, expires_delta=expires)
 
-        return {"access_token": access_token}
+        return redirect(location=f"http://localhost:3000/event?access_token={access_token}&spotify_access_token={spotify_access_token}")
 
 
 class ExportPlaylist(Resource):
@@ -84,11 +84,11 @@ class ExportPlaylist(Resource):
     @classmethod
     def create_playlist_in_spotify(cls, user_spotify_id, data, spotify_access_token):
         request_body = {'name': data['playlist_name'], 'description': data['description'], 'public': data['public']}
-        create_playlist_response = spotify.post('users/' + user_spotify_id + '/playlists', data=request_body, format='json', token=spotify_access_token)
+        create_playlist_response = spotify.post(f'users/{user_spotify_id}/playlists', data=request_body, format='json', token=spotify_access_token)
         return create_playlist_response
 
     @classmethod
     def add_tracks_to_spotify_playlist(cls, spotify_playlist_id, playlist, spotify_access_token):
         track_uris = ''.join(list(map(lambda track_id: 'spotify:track:' + track_id + ',', playlist)))
-        url = 'https://api.spotify.com/v1/playlists/' + spotify_playlist_id + '/tracks?uris=' + track_uris
+        url = f'https://api.spotify.com/v1/playlists/{spotify_playlist_id}/tracks?uris={track_uris}'
         spotify.post(url, format=None, token=spotify_access_token)

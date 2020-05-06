@@ -81,4 +81,7 @@ class CreateEvent(Resource):
 
         event.save_to_db()
 
-        return {"message": "Event created successfully."}, 201
+        return {
+                   "message": "Event created successfully",
+                   "event": event.json()
+               }, 201
