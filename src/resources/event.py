@@ -91,7 +91,7 @@ class CreateEvent(Resource):
 class CreatePlaylist(Resource):
     @classmethod
     @jwt_required
-    def get(cls, event_id: str, ):
+    def get(cls, event_id: str):
 
         event: EventModel = EventModel.find_by_id(ObjectId(event_id))
 
