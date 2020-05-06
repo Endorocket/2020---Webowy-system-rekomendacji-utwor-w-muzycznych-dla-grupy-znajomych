@@ -45,7 +45,7 @@ class InvitationByUsername(Resource):
 class JoinByLink(Resource):
     @classmethod
     @jwt_required
-    def get(cls):
+    def post(cls):
         parser = reqparse.RequestParser()
         parser.add_argument('invitation_link', type=str, required=True)
         data = parser.parse_args()
@@ -71,7 +71,7 @@ class JoinByLink(Resource):
 class RemoveUser(Resource):
     @classmethod
     @jwt_required
-    def get(cls, event_id: str):
+    def post(cls, event_id: str):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
@@ -107,7 +107,7 @@ class RemoveUser(Resource):
 class GrantAdmin(Resource):
     @classmethod
     @jwt_required
-    def get(cls, event_id: str):
+    def post(cls, event_id: str):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
@@ -142,7 +142,7 @@ class GrantAdmin(Resource):
 class RevokeAdmin(Resource):
     @classmethod
     @jwt_required
-    def get(cls, event_id: str):
+    def post(cls, event_id: str):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         data = parser.parse_args()
