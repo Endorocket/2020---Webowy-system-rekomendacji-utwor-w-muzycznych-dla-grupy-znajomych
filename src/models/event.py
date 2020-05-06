@@ -29,6 +29,7 @@ class EventModel(db.Document):
     }
 
     def json(self, users: List[UserModel] = None) -> Dict:
+        users_dict = {user.id: user for user in users}
         return {
             'id': str(self.id),
             'name': self.name,
@@ -40,7 +41,7 @@ class EventModel(db.Document):
             'image_url': self.image_url,
             'playlist': self.playlist if self.playlist else [],
             'participants': list(map(lambda participant: participant.json(), self.participants)) if users is None
-            else list(map(lambda participant, user: participant.json(user), self.participants, users))
+            else list(map(lambda participant: participant.json(users_dict[participant.user_id]), self.participants))
         }
 
     @classmethod
