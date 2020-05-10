@@ -18,16 +18,16 @@ class Event(Resource):
     @classmethod
     def get(cls, event_id: str):
         if not ObjectId.is_valid(event_id):
-            return {"message": "Id is not valid ObjectId"}, 400
+            return {"status": Status.INVALID_FORMAT, "message": "Id is not valid ObjectId"}, 400
 
         event: EventModel = EventModel.find_by_id(ObjectId(event_id))
         if not event:
-            return {"message": "Event not found."}, 404
+            return {"status": Status.NOT_FOUND, "message": "Event not found."}, 404
 
         participants_id = list(map(lambda participant: participant.user_id, event.participants))
         users: List[UserModel] = UserModel.find_all_by_ids(participants_id)
 
-        return event.json(users), 200
+        return {"status": Status.OK, "event": event.json(users)}, 200
 
 
 class EventList(Resource):
@@ -37,13 +37,14 @@ class EventList(Resource):
         current_userid = get_jwt_identity()
         current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
-            return {"message": "Current user not found"}, 403
+            return {"status": Status.USER_NOT_FOUND, "message": "Current user not found"}, 403
 
         events: List[EventModel] = EventModel.find_all_by_participant_id(current_user.id)
 
-        return {'events': list(map(lambda event: event.json(
-            UserModel.find_all_by_ids(list(map(lambda participant: participant.user_id, event.participants)))
-        ), events))}
+        return {"status": Status.OK,
+                'events': list(map(lambda event: event.json(
+                    UserModel.find_all_by_ids(list(map(lambda participant: participant.user_id, event.participants)))
+                ), events))}
 
 
 class CreateEvent(Resource):
@@ -84,11 +85,10 @@ class CreateEvent(Resource):
 
         event.save_to_db()
 
-        return {
-                   "status": Status.SUCCESS,
-                   "message": "Event created successfully",
-                   "event": event.json()
-               }, 201
+        return {"status": Status.SUCCESS,
+                "message": "Event created successfully",
+                "event": event.json()
+                }, 201
 
 
 class CreatePlaylist(Resource):

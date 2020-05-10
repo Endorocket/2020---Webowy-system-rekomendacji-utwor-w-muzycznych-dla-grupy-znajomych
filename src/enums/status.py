@@ -1,7 +1,4 @@
-from enum import Enum
-
-
-class Status(Enum):
+class Status:
     OK = "OK"
     SUCCESS = "SUCCESS"
     NOT_FOUND = "NOT_FOUND"
