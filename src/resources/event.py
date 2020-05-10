@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 
 from enums.role import Role
+from enums.status import Status
 from models.event import EventModel
 from models.participant import ParticipantModel
 from models.user import UserModel
@@ -62,16 +63,16 @@ class CreateEvent(Resource):
         current_user = UserModel.find_by_id(current_userid)
 
         if not current_user:
-            return {"message": "User not found"}, 403
+            return {"status": Status.USER_NOT_FOUND, "message": "User not found"}, 403
 
         start_date: datetime = data['start_date']
         end_date: datetime = data['end_date']
         if start_date > end_date:
-            return {"message": "End_date cannot be before start_date"}, 403
+            return {"status": Status.INVALID_DATA, "message": "End_date cannot be before start_date"}, 403
 
         duration_time = data['duration_time']
         if duration_time and duration_time < 0:
-            return {"message": "Duration_time cannot be less than 0"}, 403
+            return {"status": Status.INVALID_DATA, "message": "Duration_time cannot be less than 0"}, 403
 
         event = EventModel(name=data['name'], description=data['description'], start_date=start_date, end_date=end_date, image_url=data['image_url'],
                            duration_time=duration_time)
@@ -84,6 +85,7 @@ class CreateEvent(Resource):
         event.save_to_db()
 
         return {
+                   "status": Status.SUCCESS,
                    "message": "Event created successfully",
                    "event": event.json()
                }, 201
@@ -105,8 +107,8 @@ class CreatePlaylist(Resource):
                     event.playlist = song_ids
                     event.save_to_db()
 
-                    return event.json(), 200
+                    return {"status": Status.SUCCESS, "event": event.json()}, 200
                 else:
-                    return {"message": "User is not an admin"}, 403
+                    return {"status": Status.NO_ADMIN, "message": "User is not an admin"}, 403
 
-        return {"message": "User is not event participant"}, 403
+        return {"status": Status.USER_NOT_FOUND, "message": "User is not event participant"}, 403

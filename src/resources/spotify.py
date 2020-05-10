@@ -6,6 +6,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from flask_restful import Resource, reqparse
 
 from config.oauth_client import spotify
+from enums.status import Status
 from models.event import EventModel
 from models.user import UserModel
 
@@ -60,26 +61,26 @@ class ExportPlaylist(Resource):
         data = parser.parse_args()
 
         if not ObjectId.is_valid(event_id):
-            return {"message": "Id is not valid ObjectId"}, 400
+            return {"status": Status.INVALID_DATA, "message": "Id is not valid ObjectId"}, 400
         event = EventModel.find_by_id(ObjectId(event_id))
         if not event:
-            return {"message": "Event not found"}, 403
+            return {"status": Status.NOT_FOUND, "message": "Event not found"}, 403
 
         current_userid = get_jwt_identity()
         current_user = UserModel.find_by_id(ObjectId(current_userid))
         if not current_user:
-            return {"message": "Current user not found"}, 403
+            return {"status": Status.USER_NOT_FOUND, "message": "Current user not found"}, 403
 
         spotify_access_token = request.headers.get('spotify_access_token')
         if not spotify_access_token:
-            return {"message": "header with spotify_access_token is missing"}, 400
+            return {"status": Status.SPOTIFY_TOKEN_MISSING, "message": "header with spotify_access_token is missing"}, 400
 
         create_playlist_response = cls.create_playlist_in_spotify(current_user.spotify_id, data, spotify_access_token)
         spotify_playlist_id = create_playlist_response.data['id']
 
         cls.add_tracks_to_spotify_playlist(spotify_playlist_id, event.playlist, spotify_access_token)
 
-        return {"message": "Playlist was imported to your spotify"}, 200
+        return {"status": Status.SUCCESS, "message": "Playlist was imported to your spotify"}, 200
 
     @classmethod
     def create_playlist_in_spotify(cls, user_spotify_id, data, spotify_access_token):
