@@ -70,8 +70,7 @@ class UserRegister(Resource):
         if len(data['username']) < 4 or len(data['password']) < 7:
             return {"status": Status.INVALID_FORMAT, "message": "username must be at least 5 chars long, password mininmum 7 characters!"}, 400
 
-        user = UserModel(username=data['username'], email=data['email'], password=data['password'],
-                         avatar_url=data['avatar_url'])
+        user = UserModel(username=data['username'], email=data['email'], password=data['password'], avatar_url=data['avatar_url'])
 
         if UserModel.find_by_username(user.username):
             return {"status": Status.DUPLICATED, "message": "A user with that username already exists."}, 400
