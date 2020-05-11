@@ -90,6 +90,24 @@ class Event(Resource):
 
         return {"status": Status.OK, "event": event.json()}, 200
 
+    @classmethod
+    @jwt_required
+    def delete(cls, event_id: str):
+        if not ObjectId.is_valid(event_id):
+            return {"status": Status.INVALID_FORMAT, "message": "Id is not valid ObjectId"}, 400
+
+        current_userid = get_jwt_identity()
+        current_user = UserModel.find_by_id(current_userid)
+        if not current_user:
+            return {"status": Status.USER_NOT_FOUND, "message": "Current user not found"}, 403
+
+        event: EventModel = EventModel.find_by_id_and_admin_id(ObjectId(event_id), current_userid)
+        if not event:
+            return {"status": Status.NOT_FOUND, "message": "Event not found with admin as current user"}, 404
+
+        event.delete()
+        return {"status": Status.SUCCESS, "message": "Event deleted"}, 200
+
 
 class EventList(Resource):
     @classmethod
