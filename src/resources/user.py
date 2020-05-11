@@ -39,6 +39,48 @@ class UserCurrent(Resource):
 
     @classmethod
     @jwt_required
+    def put(cls):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, required=False)
+        parser.add_argument('email', type=email, required=False)
+        parser.add_argument('old_password', type=str, required=False)
+        parser.add_argument('password', type=str, required=False)
+        parser.add_argument('avatar_url', type=str, required=False)
+        parser.add_argument('pref_genres', type=List[str], required=False)
+        data = parser.parse_args()
+
+        user_id = get_jwt_identity()
+        user: UserModel = UserModel.find_by_id(ObjectId(user_id))
+        if not user:
+            return {"status": Status.USER_NOT_FOUND, "message": "User not found."}, 404
+
+        if data['username']:
+            if len(data['username']) < 4:
+                return {"status": Status.INVALID_FORMAT, "message": "username must be at least 5 chars long"}, 400
+            user.username = data['username']
+
+        if data['email']:
+            user.data = data['email']
+
+        if data['password'] and data['old_password']:
+            if not bcrypt.check_password_hash(user.password, data['old_password']):
+                return {"status": Status.INVALID_DATA, "message": "old_password is not correct"}, 400
+            if len(data['password']) < 7:
+                return {"status": Status.INVALID_FORMAT, "message": "password must be at least 7 chars long"}, 400
+            user.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+
+        if data['avatar_url']:
+            user.avatar_url = data['avatar_url']
+
+        if data['pref_genres']:
+            user.pref_genres = data['pref_genres']
+
+        user.save_to_db()
+
+        return {"status": Status.OK, "user": user.json()}, 200
+
+    @classmethod
+    @jwt_required
     def delete(cls):
         user_id = get_jwt_identity()
         user = UserModel.find_by_id(ObjectId(user_id))
