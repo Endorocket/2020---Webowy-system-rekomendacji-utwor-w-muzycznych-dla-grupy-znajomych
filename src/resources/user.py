@@ -63,9 +63,12 @@ class UserRegister(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('email', type=email, required=True)
-        parser.add_argument('password', type=str, required=True)
+        parser.add_argument('password', type=str, required=True, )
         parser.add_argument('avatar_url', type=str, required=False)
         data = parser.parse_args()
+
+        if len(data['username']) < 4 or len(data['password']) < 7:
+            return {"status": Status.INVALID_FORMAT, "message": "username must be at least 5 chars long, password mininmum 7 characters!"}, 400
 
         user = UserModel(username=data['username'], email=data['email'], password=data['password'],
                          avatar_url=data['avatar_url'])
