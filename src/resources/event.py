@@ -42,9 +42,10 @@ class EventList(Resource):
         events: List[EventModel] = EventModel.find_all_by_participant_id(current_user.id)
 
         return {"status": Status.OK,
-                'events': list(map(lambda event: event.json(
-                    UserModel.find_all_by_ids(list(map(lambda participant: participant.user_id, event.participants)))
-                ), events))}
+                "events": list(map(lambda event:
+                                   event.json(UserModel.find_all_by_ids(list(map(lambda participant:
+                                                                                 participant.user_id, event.participants)))), events))
+                }, 200
 
 
 class CreateEvent(Resource):

@@ -4,6 +4,7 @@ from bson import ObjectId
 from flask import url_for, request, redirect
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
+from flask_api import status
 
 from config.oauth_client import spotify
 from enums.status import Status
@@ -76,20 +77,26 @@ class ExportPlaylist(Resource):
             return {"status": Status.SPOTIFY_TOKEN_MISSING, "message": "header with spotify_access_token is missing"}, 400
 
         create_playlist_response = cls.create_playlist_in_spotify(current_user.spotify_id, data, spotify_access_token)
+
+        if not status.is_success(create_playlist_response.status):
+            return {"status": Status.INVALID_SPOTIFY_TOKEN, "message": create_playlist_response.data['error']}
+
         spotify_playlist_id = create_playlist_response.data['id']
 
-        cls.add_tracks_to_spotify_playlist(spotify_playlist_id, event.playlist, spotify_access_token)
+        add_tracks_response = cls.add_tracks_to_spotify_playlist(spotify_playlist_id, event.playlist, spotify_access_token)
+
+        if not status.is_success(add_tracks_response.status):
+            return {"status": Status.INVALID_SPOTIFY_TOKEN, "message": create_playlist_response.data['error']}
 
         return {"status": Status.SUCCESS, "message": "Playlist was imported to your spotify"}, 200
 
     @classmethod
     def create_playlist_in_spotify(cls, user_spotify_id, data, spotify_access_token):
         request_body = {'name': data['playlist_name'], 'description': data['description'], 'public': data['public']}
-        create_playlist_response = spotify.post(f'users/{user_spotify_id}/playlists', data=request_body, format='json', token=spotify_access_token)
-        return create_playlist_response
+        return spotify.post(f'users/{user_spotify_id}/playlists', data=request_body, format='json', token=spotify_access_token)
 
     @classmethod
     def add_tracks_to_spotify_playlist(cls, spotify_playlist_id, playlist, spotify_access_token):
         track_uris = ''.join(list(map(lambda track_id: 'spotify:track:' + track_id + ',', playlist)))
         url = f'https://api.spotify.com/v1/playlists/{spotify_playlist_id}/tracks?uris={track_uris}'
-        spotify.post(url, format=None, token=spotify_access_token)
+        return spotify.post(url, format=None, token=spotify_access_token)

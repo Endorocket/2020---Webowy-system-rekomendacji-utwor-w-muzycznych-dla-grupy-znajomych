@@ -4,6 +4,7 @@ Flask-JWT-Extended
 Flask-OAuthlib
 Flask-Bcrypt
 Flask-Cors
+Flask-API
 PyMongo
 MongoEngine
 flask-mongoengine
@@ -11,3 +12,4 @@ numpy
 pandas
 Werkzeug==v0.16.1
 uwsgi
+scikit-surprise

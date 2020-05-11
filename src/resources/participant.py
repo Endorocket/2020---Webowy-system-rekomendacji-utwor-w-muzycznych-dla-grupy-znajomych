@@ -59,6 +59,9 @@ class JoinByLink(Resource):
         invitation_link = data['invitation_link']
         event = EventModel.find_by_invitation_link(invitation_link)
 
+        if event is None:
+            return {"status": Status.INVALID_DATA, "message": "invitation_link was broken"}, 403
+
         if len(list(filter(lambda participant: participant.user_id == current_user.id, event.participants))) > 0:
             return {"status": Status.DUPLICATED, "message": "User you want to add is already in event"}, 403
 
