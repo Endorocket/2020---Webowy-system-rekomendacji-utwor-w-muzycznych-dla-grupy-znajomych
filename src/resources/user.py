@@ -57,9 +57,13 @@ class UserCurrent(Resource):
         if data['username']:
             if len(data['username']) < 4:
                 return {"status": Status.INVALID_FORMAT, "message": "username must be at least 5 chars long"}, 400
+            if UserModel.find_by_username(data['username']):
+                return {"status": Status.DUPLICATED_USERNAME, "message": "A user with that username already exists."}, 400
             user.username = data['username']
 
         if data['email']:
+            if UserModel.find_by_email(data['email']):
+                return {"status": Status.DUPLICATED_EMAIL, "message": "A user with that email already exists."}, 400
             user.data = data['email']
 
         if data['password'] and data['old_password']:
@@ -96,7 +100,8 @@ class UserCurrent(Resource):
                 event.delete()
                 events_deleted += 1
 
-        return {"status": Status.SUCCESS, "message": "User deleted" if events_deleted < 1 else "User deleted with events with no longer admin left"}, 200
+        message = "User deleted" if events_deleted < 1 else f"User deleted with {events_deleted} event[s] with no longer admin left"
+        return {"status": Status.SUCCESS, "message": message}, 200
 
 
 class UserRegister(Resource):
@@ -110,15 +115,15 @@ class UserRegister(Resource):
         data = parser.parse_args()
 
         if len(data['username']) < 4 or len(data['password']) < 7:
-            return {"status": Status.INVALID_FORMAT, "message": "username must be at least 5 chars long, password mininmum 7 characters!"}, 400
+            return {"status": Status.INVALID_FORMAT, "message": "username must be at least 5 chars long, password minimum 7 characters!"}, 400
 
         user = UserModel(username=data['username'], email=data['email'], password=data['password'], avatar_url=data['avatar_url'])
 
         if UserModel.find_by_username(user.username):
-            return {"status": Status.DUPLICATED, "message": "A user with that username already exists."}, 400
+            return {"status": Status.DUPLICATED_USERNAME, "message": "A user with that username already exists."}, 400
 
         if UserModel.find_by_email(user.email):
-            return {"status": Status.DUPLICATED, "message": "A user with that email already exists."}, 400
+            return {"status": Status.DUPLICATED_EMAIL, "message": "A user with that email already exists."}, 400
 
         pw_hash = bcrypt.generate_password_hash(user.password).decode('utf-8')
         user.password = pw_hash
