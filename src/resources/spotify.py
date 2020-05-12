@@ -10,6 +10,7 @@ from config.oauth_client import spotify
 from enums.status import Status
 from models.event import EventModel
 from models.user import UserModel
+from models.song import SongModel
 
 
 class SpotifyLogin(Resource):
@@ -38,6 +39,26 @@ class SpotifyAuthorize(Resource):
         spotify_id = spotify_user.data['id']
         spotify_images = spotify_user.data['images']
         avatar_url = spotify_images[0]['url'] if len(spotify_images) > 0 else None
+
+        # add missing tracks
+
+        data = {'limit': 50}
+        spotify_user_fav_tracks = spotify.get('me/top/tracks', data=data, token=spotify_access_token).json()
+
+        for track in spotify_user_fav_tracks['items']:
+            track_artists = [x['name'] for x in track['artists']]
+            track_artists_ids = [x['id'] for x in track['artists']]
+            image_url = track['album']['images'][0]['url'] if len(track['album']['images']) > 0 else None
+            genres = list(set([item for sublist in
+                               [spotify.get('artists/' + x, token=spotify_access_token).json()['genres'] for x in
+                                track_artists_ids] for item in sublist]))
+
+            if SongModel.find_by_id(track['id']) is None:
+                song = SongModel(track_id=track['id'], name=track['name'], album=track['album']['name'],
+                                 artist=track_artists, genres=genres, duration=track['duration_ms'], image_url=image_url)
+
+                song.save_to_db()
+
 
         user = UserModel.find_by_email(spotify_email)
 
