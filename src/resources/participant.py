@@ -34,7 +34,7 @@ class InvitationByUsername(Resource):
             return {"status": Status.NO_ADMIN, "message": "Event with admin as current user not found"}, 403
 
         if len(list(filter(lambda participant: participant.user_id == user_to_add.id, event.participants))) > 0:
-            return {"status": Status.DUPLICATED, "message": "User you want to add is already in event"}, 403
+            return {"status": Status.ALREADY_IN_EVENT, "message": "User you want to add is already in event"}, 403
 
         is_success = event.add_new_participant(user_to_add.id)
         if not is_success:
@@ -63,7 +63,7 @@ class JoinByLink(Resource):
             return {"status": Status.INVALID_DATA, "message": "invitation_link was broken"}, 403
 
         if len(list(filter(lambda participant: participant.user_id == current_user.id, event.participants))) > 0:
-            return {"status": Status.DUPLICATED, "message": "User you want to add is already in event"}, 403
+            return {"status": Status.ALREADY_IN_EVENT, "message": "User you want to add is already in event"}, 403
 
         is_success = event.add_new_participant(current_user.id)
         if not is_success:
