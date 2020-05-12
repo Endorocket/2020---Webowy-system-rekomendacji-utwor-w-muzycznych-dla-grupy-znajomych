@@ -23,7 +23,7 @@ class User(Resource):
         if not user:
             return {"status": Status.USER_NOT_FOUND, "message": "User not found."}, 404
 
-        return {"status": Status.OK, "user": user.json()}, 200
+        return {"status": Status.SUCCESS, "user": user.json()}, 200
 
 
 class UserCurrent(Resource):
@@ -35,7 +35,7 @@ class UserCurrent(Resource):
         if not user:
             return {"status": Status.USER_NOT_FOUND, "message": "User not found."}, 404
 
-        return {"status": Status.OK, "user": user.json()}, 200
+        return {"status": Status.SUCCESS, "user": user.json()}, 200
 
     @classmethod
     @jwt_required
@@ -81,7 +81,7 @@ class UserCurrent(Resource):
 
         user.save_to_db()
 
-        return {"status": Status.OK, "user": user.json()}, 200
+        return {"status": Status.SUCCESS, "user": user.json()}, 200
 
     @classmethod
     @jwt_required

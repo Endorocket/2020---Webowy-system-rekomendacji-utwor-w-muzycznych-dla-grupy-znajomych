@@ -27,7 +27,7 @@ class Event(Resource):
         participants_id = list(map(lambda participant: participant.user_id, event.participants))
         users: List[UserModel] = UserModel.find_all_by_ids(participants_id)
 
-        return {"status": Status.OK, "event": event.json(users)}, 200
+        return {"status": Status.SUCCESS, "event": event.json(users)}, 200
 
     @classmethod
     @jwt_required
@@ -88,7 +88,7 @@ class Event(Resource):
 
         event.save_to_db()
 
-        return {"status": Status.OK, "event": event.json()}, 200
+        return {"status": Status.SUCCESS, "event": event.json()}, 200
 
     @classmethod
     @jwt_required
@@ -120,7 +120,7 @@ class EventList(Resource):
 
         events: List[EventModel] = EventModel.find_all_by_participant_id(current_user.id)
 
-        return {"status": Status.OK,
+        return {"status": Status.SUCCESS,
                 "events": list(map(lambda event:
                                    event.json(UserModel.find_all_by_ids(list(map(lambda participant:
                                                                                  participant.user_id, event.participants)))), events))

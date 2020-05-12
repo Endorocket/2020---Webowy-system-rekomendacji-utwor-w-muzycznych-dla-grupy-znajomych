@@ -1,5 +1,4 @@
 class Status:
-    OK = "OK"
     SUCCESS = "SUCCESS"
     NOT_FOUND = "NOT_FOUND"
     USER_NOT_FOUND = "USER_NOT_FOUND"
