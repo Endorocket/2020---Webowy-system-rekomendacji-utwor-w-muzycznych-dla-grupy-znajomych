@@ -59,7 +59,7 @@ class Event(Resource):
             event.name = data['name']
 
         if data['description']:
-            event.data = data['description']
+            event.description = data['description']
 
         start_date: datetime = data['start_date']
         end_date: datetime = data['end_date']

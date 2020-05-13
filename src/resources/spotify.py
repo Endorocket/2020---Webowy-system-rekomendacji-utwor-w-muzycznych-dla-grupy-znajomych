@@ -43,14 +43,14 @@ class SpotifyAuthorize(Resource):
         # add missing tracks
 
         data = {'limit': 50}
-        spotify_user_fav_tracks = spotify.get('me/top/tracks', data=data, token=spotify_access_token).json()
+        spotify_user_fav_tracks = spotify.get('me/top/tracks', data=data, token=spotify_access_token).data
 
         for track in spotify_user_fav_tracks['items']:
             track_artists = [x['name'] for x in track['artists']]
             track_artists_ids = [x['id'] for x in track['artists']]
             image_url = track['album']['images'][0]['url'] if len(track['album']['images']) > 0 else None
             genres = list(set([item for sublist in
-                               [spotify.get('artists/' + x, token=spotify_access_token).json()['genres'] for x in
+                               [spotify.get('artists/' + x, token=spotify_access_token).data['genres'] for x in
                                 track_artists_ids] for item in sublist]))
 
             if SongModel.find_by_id(track['id']) is None:
