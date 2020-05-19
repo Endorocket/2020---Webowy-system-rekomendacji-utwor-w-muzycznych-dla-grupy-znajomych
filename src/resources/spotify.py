@@ -66,8 +66,10 @@ class SpotifyAuthorize(Resource):
         user = UserModel.find_by_email(spotify_email)
 
         if not user:
-            user = UserModel(username=spotify_username, email=spotify_email, password=None, spotify_id=spotify_id, avatar_url=avatar_url, song_ids = song_ids)
-            user.save_to_db()
+            user = UserModel(username=spotify_username, email=spotify_email, password=None, spotify_id=spotify_id, avatar_url=avatar_url, song_ids=song_ids)
+        else:
+            user.song_ids = song_ids
+        user.save_to_db()
 
         expires = datetime.timedelta(hours=1)
         access_token = create_access_token(identity=str(user.id), fresh=True, expires_delta=expires)
