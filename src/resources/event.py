@@ -11,7 +11,7 @@ from enums.status import Status
 from models.event import EventModel
 from models.participant import ParticipantModel
 from models.user import UserModel
-from ml.recommendation_algorithm import Recommendation_Algorithm_SVD
+from ml.recommendation_algorithm import RecommendationAlgorithmSVD
 
 
 class Event(Resource):
@@ -134,8 +134,8 @@ class CreateEvent(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=True)
         parser.add_argument('description', type=str, required=False)
-        parser.add_argument('start_date', type=str, required=True)
-        parser.add_argument('end_date', type=str, required=True)
+        parser.add_argument('start_date', type=datetime.fromisoformat, required=False)
+        parser.add_argument('end_date', type=datetime.fromisoformat, required=False)
         parser.add_argument('duration_time', type=int, required=False)
         parser.add_argument('image_url', type=str, required=False)
         data = parser.parse_args()
@@ -183,7 +183,7 @@ class CreatePlaylist(Resource):
         for participant in event.participants:
             if str(current_user_id) == str(participant.user_id):
                 if participant.role == Role.ADMIN:
-                    song_ids = Recommendation_Algorithm_SVD.run(event_id)
+                    song_ids = RecommendationAlgorithmSVD.run(event_id)
                     event.playlist = song_ids
                     event.save_to_db()
 
