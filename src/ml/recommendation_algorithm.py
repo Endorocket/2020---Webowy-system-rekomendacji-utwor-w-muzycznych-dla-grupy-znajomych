@@ -14,8 +14,6 @@ class Recommendation_Algorithm_SVD:
 
         event = EventModel.find_by_id(ObjectId(event_id))
         genre_list = SongModel.find_all_genres()
-        print('typ ',type(genre_list))
-        print(genre_list)
 
         spotify_users = []
         non_spotify_users = []
