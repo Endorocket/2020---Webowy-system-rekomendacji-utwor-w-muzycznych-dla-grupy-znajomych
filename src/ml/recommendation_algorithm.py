@@ -27,7 +27,7 @@ class RecommendationAlgorithmSVD:
 
         for spotify_user in spotify_users:
             for song_id in spotify_user.song_ids:
-                song_genres = SongModel.find_by_id(ObjectId(song_id)).genres
+                song_genres = SongModel.find_by_id(song_id).genres
                 for song_genre in song_genres:
                     scores_matrix[spotify_users.index(spotify_user)][genre_list.index(song_genre)] += 1
 

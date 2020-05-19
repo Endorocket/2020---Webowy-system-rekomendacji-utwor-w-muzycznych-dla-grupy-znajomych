@@ -1,5 +1,4 @@
 from typing import List
-import bson
 
 from config.db import db
 
@@ -14,7 +13,10 @@ class SongModel(db.Document):
     image_url = db.StringField()
 
     meta = {
-        'collection': 'songs'
+        'collection': 'songs',
+        'indexes': [
+            'genres'
+        ]
     }
 
     def json(self):
@@ -29,7 +31,7 @@ class SongModel(db.Document):
         }
 
     @classmethod
-    def find_by_id(cls, track_id: bson.ObjectId) -> "SongModel":
+    def find_by_id(cls, track_id: str) -> "SongModel":
         return cls.objects(track_id=track_id).first()
 
     @classmethod
