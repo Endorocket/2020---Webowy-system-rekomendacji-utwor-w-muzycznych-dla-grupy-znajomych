@@ -45,7 +45,10 @@ class SpotifyAuthorize(Resource):
         data = {'limit': 50}
         spotify_user_fav_tracks = spotify.get('me/top/tracks', data=data, token=spotify_access_token).data
 
+        song_ids = []
+
         for track in spotify_user_fav_tracks['items']:
+            song_ids.append(track['id'])
             if SongModel.find_by_id(track['id']) is None:
                 track_artists = [x['name'] for x in track['artists']]
                 track_artists_ids = [x['id'] for x in track['artists']]
@@ -63,7 +66,7 @@ class SpotifyAuthorize(Resource):
         user = UserModel.find_by_email(spotify_email)
 
         if not user:
-            user = UserModel(username=spotify_username, email=spotify_email, password=None, spotify_id=spotify_id, avatar_url=avatar_url)
+            user = UserModel(username=spotify_username, email=spotify_email, password=None, spotify_id=spotify_id, avatar_url=avatar_url, song_ids = song_ids)
             user.save_to_db()
 
         expires = datetime.timedelta(hours=1)
