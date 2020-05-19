@@ -21,7 +21,7 @@ class SongModel(db.Document):
         return {
             'track_id': self.track_id,
             'name': self.name,
-            'album': self.invitation_link,
+            'album': self.album,
             'artist': self.artist,
             'genres': self.genres,
             'duration': self.duration,
@@ -34,16 +34,16 @@ class SongModel(db.Document):
 
     @classmethod
     def find_all_genres(cls) -> List[str]:
-        return cls.objects().distinct("genres")
+        return list(cls.objects().distinct("genres"))
 
     @classmethod
     def random_from_genre(cls, genre: str) -> "SongModel":
-        song_list = cls.objects().aggregate([
+        song_list = list(cls.objects().aggregate([
             {"$match": {"genres": genre}},
             {"$sample": {"size": 1}}
-        ])
+        ]))
 
-        return song_list[0]
+        return cls.objects(track_id=song_list[0]['_id']).first()
 
     def save_to_db(self) -> None:
         self.save()

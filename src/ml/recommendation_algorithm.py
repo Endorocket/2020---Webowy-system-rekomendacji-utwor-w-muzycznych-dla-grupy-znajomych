@@ -9,14 +9,17 @@ from models.event import EventModel
 
 
 class Recommendation_Algorithm_SVD:
-    def __init__(self,event_id):
+    @classmethod
+    def run(cls,event_id):
 
         event = EventModel.find_by_id(ObjectId(event_id))
         genre_list = SongModel.find_all_genres()
+        print('typ ',type(genre_list))
+        print(genre_list)
 
         spotify_users = []
         non_spotify_users = []
-        scores_matrix = np.zeros(len(event.participants),len(genre_list))
+        scores_matrix = np.zeros((len(event.participants),len(genre_list)))
 
         for participant in event.participants:
             user = UserModel.find_by_id(ObjectId(participant.user_id))
@@ -34,7 +37,7 @@ class Recommendation_Algorithm_SVD:
         max_score = np.amax(scores_matrix) if np.amax(scores_matrix)> 0 else 1
 
         for non_spotify_user in non_spotify_users:
-            for pref_genre in non_spotify_user.pref_genre:
+            for pref_genre in non_spotify_user.pref_genres:
                 scores_matrix[spotify_users.index(len(spotify_users) + non_spotify_user)][genre_list.index(pref_genre)] = max_score
 
         ratings_dict = {'itemID': [],
@@ -65,14 +68,18 @@ class Recommendation_Algorithm_SVD:
             results[event.participants.index(uid)][genre_list.index(iid)] = est
         results = scores_matrix + results
         cumulative_scores = np.apply_along_axis(sum, 0, results)
-        probabilities = cumulative_scores / np.sum(cumulative_scores)
+        if np.sum(cumulative_scores) != 0:
+            probabilities = cumulative_scores / np.sum(cumulative_scores)
+        else:
+            probabilities = (cumulative_scores + 1)/np.ma.count(genre_list)
 
         playlist_duration = 0
         playlist = []
+        event_duration_in_ms = event.duration_time*60*60*1000
 
-        if event.duration_time > 0 :
-            while event.duration > playlist_duration:
-                chosen_genre = np.random.choice(genre_list, 1, p=probabilities)
+        if event_duration_in_ms > 0 :
+            while event_duration_in_ms > playlist_duration:
+                chosen_genre = np.random.choice(genre_list, 1, p=probabilities)[0]
                 song = SongModel.random_from_genre(chosen_genre)
                 if song.track_id not in playlist:
                     playlist.append(song.track_id)
@@ -85,7 +92,7 @@ class Recommendation_Algorithm_SVD:
                 if song.track_id not in playlist:
                     playlist.append(song.track_id)
                     playlist_duration += song.duration
-
+        print(playlist)
         return playlist
 
 

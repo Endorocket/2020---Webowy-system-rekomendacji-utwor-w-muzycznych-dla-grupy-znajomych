@@ -134,8 +134,8 @@ class CreateEvent(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=True)
         parser.add_argument('description', type=str, required=False)
-        parser.add_argument('start_date', type=datetime.fromisoformat, required=True)
-        parser.add_argument('end_date', type=datetime.fromisoformat, required=True)
+        parser.add_argument('start_date', type=str, required=True)
+        parser.add_argument('end_date', type=str, required=True)
         parser.add_argument('duration_time', type=int, required=False)
         parser.add_argument('image_url', type=str, required=False)
         data = parser.parse_args()
@@ -174,16 +174,16 @@ class CreateEvent(Resource):
 class CreatePlaylist(Resource):
     @classmethod
     @jwt_required
-    def get(cls, event_id: str):
+    def post(cls, event_id: str):
 
         event: EventModel = EventModel.find_by_id(ObjectId(event_id))
 
         current_user_id = get_jwt_identity()
 
         for participant in event.participants:
-            if current_user_id == participant.user_id:
+            if str(current_user_id) == str(participant.user_id):
                 if participant.role == Role.ADMIN:
-                    song_ids = Recommendation_Algorithm_SVD(event_id)
+                    song_ids = Recommendation_Algorithm_SVD.run(event_id)
                     event.playlist = song_ids
                     event.save_to_db()
 

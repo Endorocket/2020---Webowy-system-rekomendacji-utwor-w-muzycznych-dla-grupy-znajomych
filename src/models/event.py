@@ -6,6 +6,7 @@ from config.db import db
 from enums.role import Role
 from models.participant import ParticipantModel
 from models.user import UserModel
+from models.song import SongModel
 
 
 class EventModel(db.Document):
@@ -39,7 +40,7 @@ class EventModel(db.Document):
             'end_date': str(self.end_date),
             'duration_time': self.duration_time,
             'image_url': self.image_url,
-            'playlist': self.playlist if self.playlist else [],
+            'playlist': [SongModel.find_by_id(x).json() for x in self.playlist] if self.playlist else [],
             'participants': list(map(lambda participant: participant.json(), self.participants)) if users is None
             else list(map(lambda participant: participant.json(users_dict[participant.user_id]), self.participants))
         }
