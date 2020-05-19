@@ -1,14 +1,13 @@
 import numpy as np
 import pandas as pd
 from surprise import SVD,Dataset,Reader
-from collections import defaultdict,Counter
 from bson import ObjectId
 from models.song import SongModel
 from models.user import UserModel
 from models.event import EventModel
 
 
-class Recommendation_Algorithm_SVD:
+class RecommendationAlgorithmSVD:
     @classmethod
     def run(cls,event_id):
 

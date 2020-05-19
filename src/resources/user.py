@@ -46,7 +46,7 @@ class UserCurrent(Resource):
         parser.add_argument('old_password', type=str, required=False)
         parser.add_argument('password', type=str, required=False)
         parser.add_argument('avatar_url', type=str, required=False)
-        parser.add_argument('pref_genres', type=List[str], required=False)
+        parser.add_argument('pref_genres', type=str, required=False, action='append')
         data = parser.parse_args()
 
         user_id = get_jwt_identity()
@@ -64,7 +64,7 @@ class UserCurrent(Resource):
         if data['email']:
             if UserModel.find_by_email(data['email']):
                 return {"status": Status.DUPLICATED_EMAIL, "message": "A user with that email already exists."}, 400
-            user.data = data['email']
+            user.email = data['email']
 
         if data['password'] and data['old_password']:
             if not bcrypt.check_password_hash(user.password, data['old_password']):
@@ -110,7 +110,7 @@ class UserRegister(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
         parser.add_argument('email', type=email, required=True)
-        parser.add_argument('password', type=str, required=True, )
+        parser.add_argument('password', type=str, required=True)
         parser.add_argument('avatar_url', type=str, required=False)
         data = parser.parse_args()
 

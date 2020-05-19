@@ -11,7 +11,7 @@ from enums.status import Status
 from models.event import EventModel
 from models.participant import ParticipantModel
 from models.user import UserModel
-from ml.recommendation_algorithm import Recommendation_Algorithm_SVD
+from ml.recommendation_algorithm import RecommendationAlgorithmSVD
 
 
 class Event(Resource):
@@ -183,7 +183,7 @@ class CreatePlaylist(Resource):
         for participant in event.participants:
             if str(current_user_id) == str(participant.user_id):
                 if participant.role == Role.ADMIN:
-                    song_ids = Recommendation_Algorithm_SVD.run(event_id)
+                    song_ids = RecommendationAlgorithmSVD.run(event_id)
                     event.playlist = song_ids
                     event.save_to_db()
 
