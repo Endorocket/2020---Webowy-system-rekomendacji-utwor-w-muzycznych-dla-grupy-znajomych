@@ -28,8 +28,7 @@ class UserModel(db.Document):
             'username': self.username,
             'email': self.email,
             'avatar_url': self.avatar_url,
-            'pref_genres': list(self.pref_genres),
-            'song_ids': list(self.song_ids)
+            'pref_genres': list(self.pref_genres)
         }
 
     @classmethod
