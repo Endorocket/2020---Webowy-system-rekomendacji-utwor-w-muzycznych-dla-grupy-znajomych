@@ -11,6 +11,7 @@ from resources.event import Event, CreateEvent, EventList, CreatePlaylist
 from resources.participant import InvitationByUsername, JoinByLink, RemoveUser, GrantAdmin, RevokeAdmin
 from resources.spotify import SpotifyLogin, SpotifyAuthorize, ExportPlaylist
 from resources.user import UserRegister, User, UserLogin, UserCurrent
+from resources.genres import TopGenres
 
 app = Flask(__name__)
 is_cloud = environ.get('IS_HEROKU', None)
@@ -42,6 +43,7 @@ api.add_resource(RevokeAdmin, "/api/event/<event_id>/revoke-admin")
 api.add_resource(JoinByLink, "/api/join-event")
 api.add_resource(ExportPlaylist, "/api/event/<event_id>/export-playlist")
 api.add_resource(CreatePlaylist, "/api/event/<event_id>/create-playlist")
+api.add_resource(TopGenres, "/api/top-genres/<quantity>")
 
 db.init_app(app)
 bcrypt.init_app(app)

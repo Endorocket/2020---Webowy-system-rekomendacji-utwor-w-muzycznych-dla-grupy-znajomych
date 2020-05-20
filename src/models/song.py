@@ -47,5 +47,17 @@ class SongModel(db.Document):
 
         return cls.objects(track_id=song_list[0]['_id']).first()
 
+    @classmethod
+    def find_top_genres(cls, quantity: int) -> List[str]:
+        return list(cls.objects().aggregate([
+            {"$unwind": "$genres"},
+            {"$group": {
+                "_id": "$genres",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}},
+            {"$limit": quantity}
+        ]))
+
     def save_to_db(self) -> None:
         self.save()
