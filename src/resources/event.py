@@ -171,24 +171,4 @@ class CreateEvent(Resource):
                 }, 201
 
 
-class CreatePlaylist(Resource):
-    @classmethod
-    @jwt_required
-    def post(cls, event_id: str):
 
-        event: EventModel = EventModel.find_by_id(ObjectId(event_id))
-
-        current_user_id = get_jwt_identity()
-
-        for participant in event.participants:
-            if str(current_user_id) == str(participant.user_id):
-                if participant.role == Role.ADMIN:
-                    song_ids = RecommendationAlgorithmSVD.run(event_id)
-                    event.playlist = song_ids
-                    event.save_to_db()
-
-                    return {"status": Status.SUCCESS, "event": event.json()}, 200
-                else:
-                    return {"status": Status.NO_ADMIN, "message": "User is not an admin"}, 403
-
-        return {"status": Status.USER_NOT_FOUND, "message": "User is not event participant"}, 403

@@ -2,6 +2,7 @@ from flask_restful import Resource
 from models.song import SongModel
 from enums.status import Status
 
+
 class TopGenres(Resource):
     @classmethod
     def get(cls, quantity: str):

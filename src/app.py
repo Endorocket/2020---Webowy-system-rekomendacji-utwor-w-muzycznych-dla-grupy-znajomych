@@ -7,9 +7,10 @@ from flask_cors import CORS
 
 from config.bcrypt import bcrypt
 from config.db import db, DevelopmentConfig, LocalConfig
-from resources.event import Event, CreateEvent, EventList, CreatePlaylist
+from resources.event import Event, CreateEvent, EventList
 from resources.participant import InvitationByUsername, JoinByLink, RemoveUser, GrantAdmin, RevokeAdmin
-from resources.spotify import SpotifyLogin, SpotifyAuthorize, ExportPlaylist
+from resources.spotify import SpotifyLogin, SpotifyAuthorize
+from resources.playlist import CreatePlaylist, ExportPlaylist
 from resources.user import UserRegister, User, UserLogin, UserCurrent
 from resources.genres import TopGenres
 
