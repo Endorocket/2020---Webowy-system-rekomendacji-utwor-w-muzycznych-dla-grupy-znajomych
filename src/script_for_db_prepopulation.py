@@ -1,13 +1,14 @@
+from os import environ
+
 import spotipy
 import spotipy.util as util
-import pprint
 import pymongo
 import traceback
 
 username = 'f'
 scope = 'user-library-read user-top-read'
-client_id = 'b4e8d875ebc74954a74b53ca13f1761b'
-client_secret = '6e7b7779c1bc461a936d3e7bea55eea5'
+client_id = environ.get('CONSUMER_KEY')
+client_secret = environ.get('CONSUMER_SECRET')
 redirect_uri = 'http://localhost:8080'
 token = util.prompt_for_user_token(username,
                                    scope,
@@ -17,8 +18,8 @@ token = util.prompt_for_user_token(username,
 
 sp = spotipy.Spotify(auth=token)
 
-client = pymongo.MongoClient('mongodb://heroku_3lvj3gxj:pn36um10djp0di4p8dcguoulp0@ds235437.mlab.com:35437/heroku_3lvj3gxj?retryWrites=false')
-db = client.heroku_3lvj3gxj
+client = pymongo.MongoClient('localhost', 27017)
+db = client.music
 collection = db.songs
 
 print(collection.count())
