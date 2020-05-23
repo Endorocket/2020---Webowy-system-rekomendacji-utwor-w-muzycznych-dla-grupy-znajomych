@@ -70,4 +70,4 @@ class SpotifyAuthorize(Resource):
         expires = datetime.timedelta(hours=1)
         access_token = create_access_token(identity=str(user.id), fresh=True, expires_delta=expires)
 
-        return redirect(location=f"http://156.17.130.143/event?access_token={access_token}&spotify_access_token={spotify_access_token}")
+        return redirect(location=f"https://joyina.live/event?access_token={access_token}&spotify_access_token={spotify_access_token}")
