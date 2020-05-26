@@ -44,7 +44,8 @@ class EventModel(db.Document):
             'participants': list(map(lambda participant: participant.json(), self.participants)) if users is None
             else list(map(lambda participant: participant.json(users_dict[participant.user_id]), self.participants))
         }
-    def json2(self, songs: List[SongModel], users: List[UserModel] = None) -> Dict:
+
+    def json_with_playlist(self, songs: List[SongModel], users: List[UserModel] = None) -> Dict:
         users_dict = {user.id: user for user in users} if users else None
         return {
             'id': str(self.id),

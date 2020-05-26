@@ -10,8 +10,8 @@ from enums.role import Role
 from enums.status import Status
 from models.event import EventModel
 from models.participant import ParticipantModel
+from models.song import SongModel
 from models.user import UserModel
-from ml.recommendation_algorithm import RecommendationAlgorithmSVD
 
 
 class Event(Resource):
@@ -27,7 +27,9 @@ class Event(Resource):
         participants_id = list(map(lambda participant: participant.user_id, event.participants))
         users: List[UserModel] = UserModel.find_all_by_ids(participants_id)
 
-        return {"status": Status.SUCCESS, "event": event.json(users)}, 200
+        songs: List[SongModel] = SongModel.find_all_by_ids(event.playlist)
+
+        return {"status": Status.SUCCESS, "event": event.json_with_playlist(songs, users)}, 200
 
     @classmethod
     @jwt_required

@@ -58,13 +58,14 @@ class SpotifyAuthorize(Resource):
 
                 song.save_to_db()
 
-
         user = UserModel.find_by_email(spotify_email)
 
         if not user:
             user = UserModel(username=spotify_username, email=spotify_email, password=None, spotify_id=spotify_id, avatar_url=avatar_url, song_ids=song_ids)
         else:
             user.song_ids = song_ids
+            user.spotify_id = spotify_id
+            user.avatar_url = avatar_url
         user.save_to_db()
 
         expires = datetime.timedelta(hours=1)
