@@ -40,7 +40,7 @@ class SongModel(db.Document):
 
     @classmethod
     def find_all_by_ids(cls, ids: List[str]) -> List["SongModel"]:
-        return list(cls.objects(id__in=ids))
+        return list(cls.objects(track_id__in=ids))
 
     @classmethod
     def random_from_genre(cls, genre: str) -> "SongModel":
