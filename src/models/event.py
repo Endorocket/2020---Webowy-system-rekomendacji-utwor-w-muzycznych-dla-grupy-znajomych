@@ -56,7 +56,7 @@ class EventModel(db.Document):
             'end_date': str(self.end_date),
             'duration_time': self.duration_time,
             'image_url': self.image_url,
-            'playlist': songs if len(songs) > 0 else [],
+            'playlist': list(map(lambda song: song.json(), songs)) if len(songs) > 0 else [],
             'participants': list(map(lambda participant: participant.json(), self.participants)) if users is None
             else list(map(lambda participant: participant.json(users_dict[participant.user_id]), self.participants))
         }
