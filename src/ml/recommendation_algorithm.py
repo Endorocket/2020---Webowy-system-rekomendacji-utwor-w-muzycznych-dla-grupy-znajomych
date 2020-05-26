@@ -95,4 +95,4 @@ class RecommendationAlgorithmSVD:
                 # playlist_duration += song['duration']
         event.playlist = playlist
         event.save_to_db()
-        return event.json_with_playlist(playlist_full_song_info)
+        return event.json2(playlist_full_song_info)
