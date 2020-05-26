@@ -18,7 +18,7 @@ class EventModel(db.Document):
     duration_time = db.IntField()
     image_url = db.StringField()
 
-    playlist = db.ListField(db.StringField())
+    playlist = db.ListField(db.DictField())
     participants = db.EmbeddedDocumentListField(ParticipantModel, required=True)
 
     meta = {
@@ -40,7 +40,7 @@ class EventModel(db.Document):
             'end_date': str(self.end_date),
             'duration_time': self.duration_time,
             'image_url': self.image_url,
-            'playlist': [SongModel.find_by_id(x).json() for x in self.playlist] if self.playlist else [],
+            'playlist': self.playlist if len(self.playlist) > 0 else [],
             'participants': list(map(lambda participant: participant.json(), self.participants)) if users is None
             else list(map(lambda participant: participant.json(users_dict[participant.user_id]), self.participants))
         }

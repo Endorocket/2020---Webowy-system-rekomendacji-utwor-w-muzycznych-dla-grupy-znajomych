@@ -48,6 +48,17 @@ class SongModel(db.Document):
         return cls.objects(track_id=song_list[0]['_id']).first()
 
     @classmethod
+    def random_from_genres(cls, genres: dict) -> List["SongModel"]:
+        song_list = []
+        for key in genres:
+            song_list += list(cls.objects().aggregate([
+                {"$match": {"genres": key}},
+                {"$sample": {"size": genres[key]}}
+            ]))
+
+        return song_list
+
+    @classmethod
     def find_top_genres(cls, quantity: int) -> List[str]:
         return list(cls.objects().aggregate([
             {"$unwind": "$genres"},

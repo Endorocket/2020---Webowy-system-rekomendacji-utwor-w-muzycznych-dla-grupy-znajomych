@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
+import traceback
 from surprise import SVD,Dataset,Reader
 from bson import ObjectId
 from models.song import SongModel
 from models.user import UserModel
 from models.event import EventModel
-
+from collections import Counter
+from random import shuffle
 
 class RecommendationAlgorithmSVD:
     @classmethod
@@ -62,7 +64,11 @@ class RecommendationAlgorithmSVD:
 
         results = np.zeros(scores_matrix.shape)
         for uid, iid, _, est, _ in predictions:
-            results[event.participants.index(uid)][genre_list.index(iid)] = est
+            try:
+                results[event.participants.index(uid)][genre_list.index(iid)] = est
+            except ValueError:
+                traceback.print_exc()
+                
         results = scores_matrix + results
         cumulative_scores = np.apply_along_axis(sum, 0, results)
         if np.sum(cumulative_scores) != 0:
@@ -70,31 +76,20 @@ class RecommendationAlgorithmSVD:
         else:
             probabilities = (cumulative_scores + 1)/np.ma.count(genre_list)
 
-        playlist_duration = 0
+        #playlist_duration = 0
         playlist = []
         event_duration_in_ms = event.duration_time*60*60*1000
+        avg_song_time = 180000
+        songs_in_playlist = int(event_duration_in_ms/avg_song_time) if event_duration_in_ms > 0 else 50
 
-        if event_duration_in_ms > 0 :
-            while event_duration_in_ms > playlist_duration:
-                chosen_genre = np.random.choice(genre_list, 1, p=probabilities)[0]
-                song = SongModel.random_from_genre(chosen_genre)
-                if song.track_id not in playlist:
-                    playlist.append(song.track_id)
-                    playlist_duration += song.duration
 
-        else:
-            while len(playlist) < 50:
-                chosen_genre = np.random.choice(genre_list, 1, p=probabilities)
-                song = SongModel.random_from_genre(chosen_genre)
-                if song.track_id not in playlist:
-                    playlist.append(song.track_id)
-                    playlist_duration += song.duration
-        print(playlist)
+        chosen_genres = np.random.choice(genre_list, songs_in_playlist, p=probabilities)
+        genre_count = Counter(chosen_genres)
+        songs = SongModel.random_from_genres(genre_count)
+        shuffle(songs)
+        for song in songs:
+            if song['_id'] not in playlist:
+                song['track_id'] = song.pop('_id')
+                playlist.append(song)
+                #playlist_duration += song['duration']
         return playlist
-
-
-
-
-
-
-
