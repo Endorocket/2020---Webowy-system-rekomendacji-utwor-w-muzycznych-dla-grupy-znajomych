@@ -68,7 +68,7 @@ class RecommendationAlgorithmSVD:
                 results[event.participants.index(uid)][genre_list.index(iid)] = est
             except ValueError:
                 traceback.print_exc()
-                
+
         results = scores_matrix + results
         cumulative_scores = np.apply_along_axis(sum, 0, results)
         if np.sum(cumulative_scores) != 0:
@@ -78,10 +78,10 @@ class RecommendationAlgorithmSVD:
 
         #playlist_duration = 0
         playlist = []
+        playlist_full_song_info = []
         event_duration_in_ms = event.duration_time*60*60*1000
         avg_song_time = 180000
         songs_in_playlist = int(event_duration_in_ms/avg_song_time) if event_duration_in_ms > 0 else 50
-
 
         chosen_genres = np.random.choice(genre_list, songs_in_playlist, p=probabilities)
         genre_count = Counter(chosen_genres)
@@ -89,7 +89,10 @@ class RecommendationAlgorithmSVD:
         shuffle(songs)
         for song in songs:
             if song['_id'] not in playlist:
+                playlist.append(song['_id'])
                 song['track_id'] = song.pop('_id')
-                playlist.append(song)
+                playlist_full_song_info.append(song)
                 #playlist_duration += song['duration']
-        return playlist
+        event.playlist = playlist
+        event.save_to_db()
+        return event.json2(playlist_full_song_info)

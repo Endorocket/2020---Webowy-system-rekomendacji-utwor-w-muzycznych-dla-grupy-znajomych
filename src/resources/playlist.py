@@ -24,11 +24,9 @@ class CreatePlaylist(Resource):
         for participant in event.participants:
             if str(current_user_id) == str(participant.user_id):
                 if participant.role == Role.ADMIN:
-                    song_ids = RecommendationAlgorithmSVD.run(event_id)
-                    event.playlist = song_ids
-                    event.save_to_db()
+                    event_json = RecommendationAlgorithmSVD.run(event_id)
 
-                    return {"status": Status.SUCCESS, "event": event.json()}, 200
+                    return {"status": Status.SUCCESS, "event": event_json}, 200
                 else:
                     return {"status": Status.NO_ADMIN, "message": "User is not an admin"}, 403
 
