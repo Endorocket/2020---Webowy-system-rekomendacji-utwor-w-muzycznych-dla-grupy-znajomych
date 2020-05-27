@@ -41,6 +41,7 @@ class ExportPlaylist(Resource):
         parser.add_argument('playlist_name', type=str, required=True)
         parser.add_argument('description', type=str, required=True)
         parser.add_argument('public', type=str, default='false', choices=('true', 'false'))
+        parser.add_argument('spotify_access_token', type=str, required=True)
         data = parser.parse_args()
 
         if not ObjectId.is_valid(event_id):
@@ -54,10 +55,7 @@ class ExportPlaylist(Resource):
         if not current_user:
             return {"status": Status.USER_NOT_FOUND, "message": "Current user not found"}, 403
 
-        spotify_access_token = request.headers.get('spotify_access_token')
-        if not spotify_access_token:
-            return {"status": Status.SPOTIFY_TOKEN_MISSING, "message": "header with spotify_access_token is missing"}, 400
-
+        spotify_access_token = data['spotify_access_token']
         create_playlist_response = cls.create_playlist_in_spotify(current_user.spotify_id, data, spotify_access_token)
 
         if not status.is_success(create_playlist_response.status):
