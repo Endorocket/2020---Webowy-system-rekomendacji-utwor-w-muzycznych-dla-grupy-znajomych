@@ -1,5 +1,4 @@
 from bson import ObjectId
-from flask import request
 from flask_api import status
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
