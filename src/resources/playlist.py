@@ -66,7 +66,7 @@ class ExportPlaylist(Resource):
         add_tracks_response = cls.add_tracks_to_spotify_playlist(spotify_playlist_id, event.playlist, spotify_access_token)
 
         if not status.is_success(add_tracks_response.status):
-            return {"status": Status.INVALID_SPOTIFY_TOKEN, "spotify_error": create_playlist_response.data['error']}, 400
+            return {"status": Status.INVALID_SPOTIFY_TOKEN, "spotify_error": add_tracks_response.data['error']}, 400
 
         return {"status": Status.SUCCESS, "message": "Playlist was imported to your spotify"}, 200
 
