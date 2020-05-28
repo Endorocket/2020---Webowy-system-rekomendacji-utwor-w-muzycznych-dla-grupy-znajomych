@@ -1,5 +1,4 @@
 from bson import ObjectId
-from flask import request
 from flask_api import status
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
@@ -41,6 +40,7 @@ class ExportPlaylist(Resource):
         parser.add_argument('playlist_name', type=str, required=True)
         parser.add_argument('description', type=str, required=True)
         parser.add_argument('public', type=str, default='false', choices=('true', 'false'))
+        parser.add_argument('spotify_access_token', type=str, required=True)
         data = parser.parse_args()
 
         if not ObjectId.is_valid(event_id):
@@ -54,10 +54,7 @@ class ExportPlaylist(Resource):
         if not current_user:
             return {"status": Status.USER_NOT_FOUND, "message": "Current user not found"}, 403
 
-        spotify_access_token = request.headers.get('spotify_access_token')
-        if not spotify_access_token:
-            return {"status": Status.SPOTIFY_TOKEN_MISSING, "message": "header with spotify_access_token is missing"}, 400
-
+        spotify_access_token = data['spotify_access_token']
         create_playlist_response = cls.create_playlist_in_spotify(current_user.spotify_id, data, spotify_access_token)
 
         if not status.is_success(create_playlist_response.status):
@@ -65,10 +62,15 @@ class ExportPlaylist(Resource):
 
         spotify_playlist_id = create_playlist_response.data['id']
 
-        add_tracks_response = cls.add_tracks_to_spotify_playlist(spotify_playlist_id, event.playlist, spotify_access_token)
+        size_of_chunk = 20
+        playlist_size = len(event.playlist)
+        playlist_chunks = [event.playlist[i:i + size_of_chunk] for i in range(0, playlist_size, size_of_chunk)]
 
-        if not status.is_success(add_tracks_response.status):
-            return {"status": Status.INVALID_SPOTIFY_TOKEN, "spotify_error": create_playlist_response.data['error']}, 400
+        for playlist_chunk in playlist_chunks:
+            add_tracks_response = cls.add_tracks_to_spotify_playlist(spotify_playlist_id, playlist_chunk, spotify_access_token)
+
+            if not status.is_success(add_tracks_response.status):
+                return {"status": Status.INVALID_SPOTIFY_TOKEN, "spotify_error": add_tracks_response.data['error']}, 400
 
         return {"status": Status.SUCCESS, "message": "Playlist was imported to your spotify"}, 200
 
