@@ -36,9 +36,9 @@ class RecommendationAlgorithmSVD:
 
         max_score = np.amax(scores_matrix) if np.amax(scores_matrix) > 0 else 1
 
-        for non_spotify_user in non_spotify_users:
+        for num, non_spotify_user in enumerate(non_spotify_users):
             for pref_genre in non_spotify_user.pref_genres:
-                scores_matrix[spotify_users.index(len(spotify_users) + non_spotify_user)][genre_list.index(pref_genre)] = max_score
+                scores_matrix[len(spotify_users) + num][genre_list.index(pref_genre)] = max_score
 
         ratings_dict = {'itemID': [],
                         'userID': [],
@@ -65,7 +65,7 @@ class RecommendationAlgorithmSVD:
         results = np.zeros(scores_matrix.shape)
         for uid, iid, _, est, _ in predictions:
             try:
-                results[event.participants.index(uid)][genre_list.index(iid)] = est
+                results[event.participants.index(next((x for x in event.participants if x.user_id == uid), None))][genre_list.index(iid)] = est
             except ValueError:
                 traceback.print_exc()
 
