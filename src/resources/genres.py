@@ -7,7 +7,11 @@ class TopGenres(Resource):
     @classmethod
     def get(cls, quantity: str):
         try:
-            top_genres = {'genres':[x['_id'] for x in SongModel.find_top_genres(int(quantity))]}
+            genres = ['classical','rock','pop','edm','hip hop',
+                      'electronica','blues','soundtrack','r&b','jazz',
+                      'metal','house','disco','country','latin',
+                      'christian music','indie rock','synthpop','eurodance','folk']
+            top_genres = {'genres': genres[:int(quantity)]}
             return top_genres
         except ValueError:
             return {"status": Status.INVALID_FORMAT, "message": "Value is not an integer"}, 400
