@@ -1,3 +1,5 @@
+from typing import List
+
 from bson import ObjectId
 from flask_api import status
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -8,6 +10,7 @@ from enums.role import Role
 from enums.status import Status
 from ml.recommendation_algorithm import RecommendationAlgorithmSVD
 from models.event import EventModel
+from models.song import SongModel
 from models.user import UserModel
 
 
@@ -23,9 +26,12 @@ class CreatePlaylist(Resource):
         for participant in event.participants:
             if str(current_user_id) == str(participant.user_id):
                 if participant.role == Role.ADMIN:
-                    event_json = RecommendationAlgorithmSVD.run(event_id)
+                    song_ids = RecommendationAlgorithmSVD.run(event_id)
+                    event.playlist = song_ids
+                    event.save_to_db()
 
-                    return {"status": Status.SUCCESS, "event": event_json}, 200
+                    songs: List[SongModel] = SongModel.find_all_by_ids(song_ids)
+                    return {"status": Status.SUCCESS, "event": event.json_with_playlist(songs)}, 200
                 else:
                     return {"status": Status.NO_ADMIN, "message": "User is not an admin"}, 403
 

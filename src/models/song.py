@@ -52,7 +52,7 @@ class SongModel(db.Document):
         return cls.objects(track_id=song_list[0]['_id']).first()
 
     @classmethod
-    def random_from_genres(cls, genres: dict) -> List["SongModel"]:
+    def random_from_genres(cls, genres: dict):
         song_list = []
         for key in genres:
             song_list += list(cls.objects().aggregate([
