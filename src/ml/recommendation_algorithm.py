@@ -78,7 +78,6 @@ class RecommendationAlgorithmSVD:
 
         # playlist_duration = 0
         playlist = []
-        playlist_full_song_info = []
         event_duration_in_ms = event.duration_time * 60 * 60 * 1000
         avg_song_time = 180000
         songs_in_playlist = int(event_duration_in_ms / avg_song_time) if event_duration_in_ms > 0 else 50
@@ -91,8 +90,5 @@ class RecommendationAlgorithmSVD:
             if song['_id'] not in playlist:
                 playlist.append(song['_id'])
                 song['track_id'] = song.pop('_id')
-                playlist_full_song_info.append(song)
                 # playlist_duration += song['duration']
-        event.playlist = playlist
-        event.save_to_db()
-        return event.json2(playlist_full_song_info)
+        return playlist
