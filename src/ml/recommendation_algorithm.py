@@ -56,7 +56,7 @@ class RecommendationAlgorithmSVD:
         data = Dataset.load_from_df(df[['userID', 'itemID', 'rating']], reader)
         trainset = data.build_full_trainset()
 
-        algorithm = SVD()
+        algorithm = SVD(n_factors=40,n_epochs=10,lr_all=0.5,reg_all=0.02)
         algorithm.fit(trainset)
 
         testset = trainset.build_anti_testset()
